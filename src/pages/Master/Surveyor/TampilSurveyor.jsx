@@ -2,9 +2,8 @@ import React, { useState, useEffect, useContext } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import { AuthContext } from "../../../contexts/AuthContext";
-import { tempUrl } from "../../../contexts/ContextProvider";
-import { useStateContext } from "../../../contexts/ContextProvider";
-import { ShowTableCabang } from "../../../components/ShowTable";
+import { tempUrl, useStateContext } from "../../../contexts/ContextProvider";
+import { ShowTableSurveyor } from "../../../components/ShowTable";
 import { FetchErrorHandling } from "../../../components/FetchErrorHandling";
 import {
   SearchBar,
@@ -19,7 +18,12 @@ import {
   Divider,
   Pagination,
   Button,
-  ButtonGroup
+  ButtonGroup,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions
 } from "@mui/material";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
@@ -27,30 +31,37 @@ import * as XLSX from "xlsx";
 import DownloadIcon from "@mui/icons-material/Download";
 import PrintIcon from "@mui/icons-material/Print";
 
-const TampilCabang = () => {
-  const { user, setting, dispatch } = useContext(AuthContext);
+const TampilSurveyor = () => {
+  const { user, setting } = useContext(AuthContext);
   const location = useLocation();
   const id = location.pathname.split("/")[2];
   const { screenSize } = useStateContext();
 
   const [isFetchError, setIsFetchError] = useState(false);
-  const [kodeCabang, setKodeCabang] = useState("");
-  const [namaCabang, setNamaCabang] = useState("");
-  const [alamatCabang, setAlamatCabang] = useState("");
-  const [teleponCabang, setTeleponCabang] = useState("");
-  const [picCabang, setPicCabang] = useState("");
+  const [kodeSurveyor, setKodeSurveyor] = useState("");
+  const [namaSurveyor, setNamaSurveyor] = useState("");
+  const [jenisSurveyor, setJenisSurveyor] = useState("");
+  const [teleponSurveyor, setTeleponSurveyor] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
-  const [cabangsData, setCabangsData] = useState([]);
-  const [cabangForDoc, setCabangForDoc] = useState([]);
+  const [surveyorsData, setSurveyorsData] = useState([]);
+  const [surveyorsForDoc, setSurveyorsForDoc] = useState([]);
   const navigate = useNavigate();
-  let isCabangExist = kodeCabang.length !== 0;
+  let isSurveyorExist = kodeSurveyor.length !== 0;
+  const [open, setOpen] = useState(false);
+
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
 
   const columns = [
-    { title: "Kode", field: "_id" },
-    { title: "Nama Cabang", field: "namaCabang" },
-    { title: "Alamat", field: "alamatCabang" },
-    { title: "Telepon", field: "teleponCabang" },
-    { title: "PIC", field: "picCabang" }
+    { title: "Kode", field: "kodeSurveyor" },
+    { title: "Nama Surveyor", field: "namaSurveyor" },
+    { title: "Jenis Surveyor", field: "jenisSurveyor" },
+    { title: "Telepon Surveyor", field: "teleponSurveyor" }
   ];
 
   const [loading, setLoading] = useState(false);
@@ -60,15 +71,14 @@ const TampilCabang = () => {
   // Get current posts
   const indexOfLastPost = page * PER_PAGE;
   const indexOfFirstPost = indexOfLastPost - PER_PAGE;
-  const tempPosts = cabangsData.filter((val) => {
+  const tempPosts = surveyorsData.filter((val) => {
     if (searchTerm === "") {
       return val;
     } else if (
-      val._id.toUpperCase().includes(searchTerm.toUpperCase()) ||
-      val.namaCabang.toUpperCase().includes(searchTerm.toUpperCase()) ||
-      val.alamatCabang.toUpperCase().includes(searchTerm.toUpperCase()) ||
-      val.teleponCabang.toUpperCase().includes(searchTerm.toUpperCase()) ||
-      val.picCabang.toUpperCase().includes(searchTerm.toUpperCase())
+      val.kodeSurveyor.toUpperCase().includes(searchTerm.toUpperCase()) ||
+      val.namaSurveyor.toUpperCase().includes(searchTerm.toUpperCase()) ||
+      val.jenisSurveyor.toUpperCase().includes(searchTerm.toUpperCase()) ||
+      val.teleponSurveyor.toUpperCase().includes(searchTerm.toUpperCase())
     ) {
       return val;
     }
@@ -76,7 +86,7 @@ const TampilCabang = () => {
   const currentPosts = tempPosts.slice(indexOfFirstPost, indexOfLastPost);
 
   const count = Math.ceil(tempPosts.length / PER_PAGE);
-  const _DATA = usePagination(cabangsData, PER_PAGE);
+  const _DATA = usePagination(surveyorsData, PER_PAGE);
 
   const handleChange = (e, p) => {
     setPage(p);
@@ -84,65 +94,81 @@ const TampilCabang = () => {
   };
 
   useEffect(() => {
-    getCabangsForDoc();
-    getCabangsData();
-    id && getCabangById();
+    getSurveyorsForDoc();
+    getSurveyorsData();
+    id && getSurveyorById();
   }, [id]);
 
-  const getCabangsData = async () => {
+  const getSurveyorsData = async () => {
     setLoading(true);
     try {
-      const allCabangs = await axios.post(`${tempUrl}/cabangs`, {
+      const allSurveyors = await axios.post(`${tempUrl}/surveyors`, {
         id: user._id,
         token: user.token
       });
-      setCabangsData(allCabangs.data);
+      setSurveyorsData(allSurveyors.data);
     } catch (err) {
       setIsFetchError(true);
     }
     setLoading(false);
   };
 
-  const getCabangsForDoc = async () => {
+  const getSurveyorsForDoc = async () => {
     setLoading(true);
-    const allCabangForDoc = await axios.post(`${tempUrl}/cabangsForDoc`, {
-      id: user._id,
-      token: user.token
-    });
-    setCabangForDoc(allCabangForDoc.data);
+    try {
+      const allSurveyorsForDoc = await axios.post(
+        `${tempUrl}/surveyorsForDoc`,
+        {
+          id: user._id,
+          token: user.token
+        }
+      );
+      setSurveyorsForDoc(allSurveyorsForDoc.data);
+    } catch (err) {
+      setIsFetchError(true);
+    }
     setLoading(false);
   };
 
-  const getCabangById = async () => {
+  const getSurveyorById = async () => {
     if (id) {
-      const pickedCabang = await axios.post(`${tempUrl}/cabangs/${id}`, {
+      const pickedSurveyor = await axios.post(`${tempUrl}/surveyors/${id}`, {
         id: user._id,
         token: user.token
       });
-      setKodeCabang(pickedCabang.data._id);
-      setNamaCabang(pickedCabang.data.namaCabang);
-      setAlamatCabang(pickedCabang.data.alamatCabang);
-      setTeleponCabang(pickedCabang.data.teleponCabang);
-      setPicCabang(pickedCabang.data.picCabang);
+      setKodeSurveyor(pickedSurveyor.data.kodeSurveyor);
+      setNamaSurveyor(pickedSurveyor.data.namaSurveyor);
+      setJenisSurveyor(pickedSurveyor.data.jenisSurveyor);
+      setTeleponSurveyor(pickedSurveyor.data.teleponSurveyor);
     }
   };
 
-  const deleteCabang = async (id) => {
-    try {
-      setLoading(true);
-      await axios.post(`${tempUrl}/deleteCabang/${id}`, {
-        id: user._id,
-        token: user.token
-      });
-      setKodeCabang("");
-      setNamaCabang("");
-      setAlamatCabang("");
-      setTeleponCabang("");
-      setPicCabang("");
-      setLoading(false);
-      navigate("/cabang");
-    } catch (error) {
-      console.log(error);
+  const deleteSurveyor = async (id) => {
+    const findJualsSurveyor = await axios.post(`${tempUrl}/jualsSurveyor`, {
+      kodeSurveyor: id,
+      id: user._id,
+      token: user.token
+    });
+    if (findJualsSurveyor.data.length > 0) {
+      // There's Record -> Forbid Delete
+      handleClickOpen();
+    } else {
+      // No Record Found -> Delete
+      try {
+        setLoading(true);
+        await axios.post(`${tempUrl}/deleteSurveyor/${id}`, {
+          id: user._id,
+          token: user.token
+        });
+        setKodeSurveyor("");
+        setNamaSurveyor("");
+        setJenisSurveyor("");
+        setTeleponSurveyor("");
+        setLoading(false);
+        navigate("/surveyor");
+      } catch (error) {
+        console.log(error);
+      }
     }
   };
 
@@ -157,7 +183,7 @@ const TampilCabang = () => {
     doc.text(`${setting.namaPerusahaan} - ${setting.kotaPerusahaan}`, 15, 10);
     doc.text(`${setting.lokasiPerusahaan}`, 15, 15);
     doc.setFontSize(16);
-    doc.text(`Daftar Cabang`, 90, 30);
+    doc.text(`Daftar Surveyor`, 90, 30);
     doc.setFontSize(10);
     doc.text(
       `Dicetak Oleh: ${user.username} | Tanggal : ${current_date} | Jam : ${current_time}`,
@@ -168,25 +194,25 @@ const TampilCabang = () => {
     doc.autoTable({
       startY: doc.pageCount > 1 ? doc.autoTableEndPosY() + 20 : 45,
       columns: columns.map((col) => ({ ...col, dataKey: col.field })),
-      body: cabangForDoc,
+      body: surveyorsForDoc,
       headStyles: {
         fillColor: [117, 117, 117],
         color: [0, 0, 0]
       }
     });
-    doc.save(`daftarCabang.pdf`);
+    doc.save(`daftarSurveyor.pdf`);
   };
 
   const downloadExcel = () => {
-    const workSheet = XLSX.utils.json_to_sheet(cabangForDoc);
+    const workSheet = XLSX.utils.json_to_sheet(surveyorsForDoc);
     const workBook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workBook, workSheet, `Cabang`);
+    XLSX.utils.book_append_sheet(workBook, workSheet, `Surveyor`);
     // Buffer
     let buf = XLSX.write(workBook, { bookType: "xlsx", type: "buffer" });
     // Binary String
     XLSX.write(workBook, { bookType: "xlsx", type: "binary" });
     // Download
-    XLSX.writeFile(workBook, `daftarCabang.xlsx`);
+    XLSX.writeFile(workBook, `daftarSurveyor.xlsx`);
   };
 
   if (loading) {
@@ -201,8 +227,24 @@ const TampilCabang = () => {
     <Box sx={container}>
       <Typography color="#757575">Master</Typography>
       <Typography variant="h4" sx={subTitleText}>
-        Cabang
+        Surveyor
       </Typography>
+      <Dialog
+        open={open}
+        onClose={handleClose}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">{`Tidak bisa dihapus karena sudah ada data!`}</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-slide-description">
+            {`Nama Surveyor data: ${namaSurveyor}`}
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose}>Cancel</Button>
+        </DialogActions>
+      </Dialog>
       <Box sx={downloadButtons}>
         <ButtonGroup variant="outlined" color="secondary">
           <Button startIcon={<PrintIcon />} onClick={() => downloadPdf()}>
@@ -216,15 +258,15 @@ const TampilCabang = () => {
       <Box sx={buttonModifierContainer}>
         <ButtonModifier
           id={id}
-          kode={kodeCabang}
-          addLink={`/cabang/tambahCabang`}
-          editLink={`/cabang/${id}/edit`}
-          deleteUser={deleteCabang}
-          nameUser={kodeCabang}
+          kode={kodeSurveyor}
+          addLink={`/surveyor/tambahSurveyor`}
+          editLink={`/surveyor/${id}/edit`}
+          deleteUser={deleteSurveyor}
+          nameUser={kodeSurveyor}
         />
       </Box>
       <Divider sx={dividerStyle} />
-      {isCabangExist && (
+      {isSurveyorExist && (
         <>
           <Box sx={showDataContainer}>
             <Box sx={showDataWrapper}>
@@ -236,9 +278,11 @@ const TampilCabang = () => {
                 InputProps={{
                   readOnly: true
                 }}
-                value={kodeCabang}
+                value={kodeSurveyor}
               />
-              <Typography sx={[labelInput, spacingTop]}>Nama Cabang</Typography>
+              <Typography sx={[labelInput, spacingTop]}>
+                Nama Surveyor
+              </Typography>
               <TextField
                 size="small"
                 id="outlined-basic"
@@ -246,17 +290,7 @@ const TampilCabang = () => {
                 InputProps={{
                   readOnly: true
                 }}
-                value={namaCabang}
-              />
-              <Typography sx={[labelInput, spacingTop]}>Alamat</Typography>
-              <TextField
-                size="small"
-                id="outlined-basic"
-                variant="filled"
-                InputProps={{
-                  readOnly: true
-                }}
-                value={alamatCabang}
+                value={namaSurveyor}
               />
             </Box>
             <Box sx={[showDataWrapper, secondWrapper]}>
@@ -268,9 +302,11 @@ const TampilCabang = () => {
                 InputProps={{
                   readOnly: true
                 }}
-                value={teleponCabang}
+                value={teleponSurveyor}
               />
-              <Typography sx={[labelInput, spacingTop]}>PIC</Typography>
+              <Typography sx={[labelInput, spacingTop]}>
+                Jenis Surveyor
+              </Typography>
               <TextField
                 size="small"
                 id="outlined-basic"
@@ -278,7 +314,7 @@ const TampilCabang = () => {
                 InputProps={{
                   readOnly: true
                 }}
-                value={picCabang}
+                value={jenisSurveyor}
               />
             </Box>
           </Box>
@@ -289,7 +325,10 @@ const TampilCabang = () => {
         <SearchBar setSearchTerm={setSearchTerm} />
       </Box>
       <Box sx={tableContainer}>
-        <ShowTableCabang currentPosts={currentPosts} searchTerm={searchTerm} />
+        <ShowTableSurveyor
+          currentPosts={currentPosts}
+          searchTerm={searchTerm}
+        />
       </Box>
       <Box sx={tableContainer}>
         <Pagination
@@ -304,7 +343,7 @@ const TampilCabang = () => {
   );
 };
 
-export default TampilCabang;
+export default TampilSurveyor;
 
 const container = {
   p: 4

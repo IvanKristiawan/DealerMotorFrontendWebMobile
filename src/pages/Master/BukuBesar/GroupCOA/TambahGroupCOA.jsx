@@ -18,13 +18,14 @@ import {
 } from "@mui/material";
 import SaveIcon from "@mui/icons-material/Save";
 
-const TambahSubGroupCOA = () => {
+const TambahGroupCOA = () => {
   const { user } = useContext(AuthContext);
   const [open, setOpen] = useState(false);
+  const [kodeJenisCOA, setKodeJenisCOA] = useState("");
+  const [namaJenisCOA, setNamaJenisCOA] = useState("");
   const [kodeGroupCOA, setKodeGroupCOA] = useState("");
   const [namaGroupCOA, setNamaGroupCOA] = useState("");
-  const [namaSubGroupCOA, setNamaSubGroupCOA] = useState("");
-  const [groupCOAsData, setGroupCOAsData] = useState([]);
+  const [jenisCOAsData, setJenisCOAsData] = useState([]);
 
   const [error, setError] = useState(false);
   const navigate = useNavigate();
@@ -38,21 +39,31 @@ const TambahSubGroupCOA = () => {
   };
 
   useEffect(() => {
-    getGroupCOAsData();
+    getJenisCOAsData();
   }, []);
 
-  const getGroupCOAsData = async () => {
+  const getJenisCOAsData = async () => {
     setLoading(true);
-    const allGroupCOAs = await axios.post(`${tempUrl}/groupCOAs`, {
+    const allJenisCOAs = await axios.post(`${tempUrl}/jenisCOAs`, {
       id: user._id,
       token: user.token,
       kodeCabang: user.cabang._id
     });
-    setGroupCOAsData(allGroupCOAs.data);
+    setJenisCOAsData(allJenisCOAs.data);
     setLoading(false);
   };
 
-  const saveSubGroupCOA = async (e) => {
+  const getGroupCOAsNextKode = async (kodeJenisCOA) => {
+    const groupCOAsNextKode = await axios.post(`${tempUrl}/groupCOAsNextKode`, {
+      kodeJenisCOA,
+      id: user._id,
+      token: user.token,
+      kodeCabang: user.cabang._id
+    });
+    setKodeGroupCOA(groupCOAsNextKode.data);
+  };
+
+  const saveGroupCOA = async (e) => {
     e.preventDefault();
     var date = new Date();
     var current_date =
@@ -61,17 +72,17 @@ const TambahSubGroupCOA = () => {
       date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds();
 
     let isFailValidation =
-      kodeGroupCOA.length === 0 || namaSubGroupCOA.length === 0;
+      kodeJenisCOA.length === 0 || namaGroupCOA.length === 0;
     if (isFailValidation) {
       setError(true);
       setOpen(!open);
     } else {
       try {
         setLoading(true);
-        await axios.post(`${tempUrl}/saveSubGroupCOA`, {
-          kodeGroupCOA,
+        await axios.post(`${tempUrl}/saveGroupCOA`, {
+          kodeJenisCOA,
+          namaJenisCOA,
           namaGroupCOA,
-          namaSubGroupCOA,
           tglInput: current_date,
           jamInput: current_time,
           userInput: user.username,
@@ -80,15 +91,15 @@ const TambahSubGroupCOA = () => {
           token: user.token
         });
         setLoading(false);
-        navigate("/subGroupCOA");
+        navigate("/groupCOA");
       } catch (error) {
         console.log(error);
       }
     }
   };
 
-  const groupCOAOptions = groupCOAsData.map((groupCOA) => ({
-    label: `${groupCOA.kodeGroupCOA} - ${groupCOA.namaGroupCOA}`
+  const jenisCOAOptions = jenisCOAsData.map((groupCOA) => ({
+    label: `${groupCOA.kodeJenisCOA} - ${groupCOA.namaJenisCOA}`
   }));
 
   if (loading) {
@@ -99,50 +110,62 @@ const TambahSubGroupCOA = () => {
     <Box sx={container}>
       <Typography color="#757575">Master</Typography>
       <Typography variant="h4" sx={subTitleText}>
-        Tambah Sub Group COA
+        Tambah Group COA
       </Typography>
       <Divider sx={dividerStyle} />
       <Paper sx={contentContainer} elevation={12}>
         <Box sx={showDataContainer}>
           <Box sx={showDataWrapper}>
-            <Typography sx={labelInput}>Kode Group COA</Typography>
+            <Typography sx={labelInput}>Kode Jenis COA</Typography>
             <Autocomplete
               size="small"
               disablePortal
               id="combo-box-demo"
-              options={groupCOAOptions}
+              options={jenisCOAOptions}
               renderInput={(params) => (
                 <TextField
                   size="small"
-                  error={error && kodeGroupCOA.length === 0 && true}
+                  error={error && kodeJenisCOA.length === 0 && true}
                   helperText={
                     error &&
-                    kodeGroupCOA.length === 0 &&
-                    "Kode Group harus diisi!"
+                    kodeJenisCOA.length === 0 &&
+                    "Kode Jenis harus diisi!"
                   }
                   {...params}
                 />
               )}
               onInputChange={(e, value) => {
-                setKodeGroupCOA(value.split(" ", 1)[0]);
-                setNamaGroupCOA(value.split("- ")[1]);
+                setKodeJenisCOA(value.split(" ", 1)[0]);
+                setNamaJenisCOA(value.split("- ")[1]);
+                getGroupCOAsNextKode(value.split(" ", 1)[0]);
               }}
             />
             <Typography sx={[labelInput, spacingTop]}>
-              Nama Sub Group COA
+              Kode Group COA
             </Typography>
             <TextField
               size="small"
-              error={error && namaSubGroupCOA.length === 0 && true}
+              id="outlined-basic"
+              value={kodeGroupCOA}
+              variant="outlined"
+              InputProps={{
+                readOnly: true
+              }}
+              sx={{ backgroundColor: Colors.grey400 }}
+            />
+            <Typography sx={[labelInput, spacingTop]}>
+              Nama Group COA
+            </Typography>
+            <TextField
+              size="small"
+              error={error && namaGroupCOA.length === 0 && true}
               helperText={
-                error &&
-                namaSubGroupCOA.length === 0 &&
-                "Nama Sub Group harus diisi!"
+                error && namaGroupCOA.length === 0 && "Nama Group harus diisi!"
               }
               id="outlined-basic"
               variant="outlined"
-              value={namaSubGroupCOA}
-              onChange={(e) => setNamaSubGroupCOA(e.target.value.toUpperCase())}
+              value={namaGroupCOA}
+              onChange={(e) => setNamaGroupCOA(e.target.value.toUpperCase())}
             />
           </Box>
         </Box>
@@ -150,7 +173,7 @@ const TambahSubGroupCOA = () => {
           <Button
             variant="outlined"
             color="secondary"
-            onClick={() => navigate("/subGroupCOA")}
+            onClick={() => navigate("/groupCOA")}
             sx={{ marginRight: 2 }}
           >
             {"< Kembali"}
@@ -158,7 +181,7 @@ const TambahSubGroupCOA = () => {
           <Button
             variant="contained"
             startIcon={<SaveIcon />}
-            onClick={saveSubGroupCOA}
+            onClick={saveGroupCOA}
           >
             Simpan
           </Button>
@@ -176,7 +199,7 @@ const TambahSubGroupCOA = () => {
   );
 };
 
-export default TambahSubGroupCOA;
+export default TambahGroupCOA;
 
 const container = {
   p: 4

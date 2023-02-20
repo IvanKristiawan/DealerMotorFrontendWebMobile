@@ -2,9 +2,8 @@ import React, { useState, useEffect, useContext } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import { AuthContext } from "../../../../contexts/AuthContext";
-import { tempUrl } from "../../../../contexts/ContextProvider";
-import { useStateContext } from "../../../../contexts/ContextProvider";
-import { ShowTableTipe } from "../../../../components/ShowTable";
+import { tempUrl, useStateContext } from "../../../../contexts/ContextProvider";
+import { ShowTableGroupCOA } from "../../../../components/ShowTable";
 import { FetchErrorHandling } from "../../../../components/FetchErrorHandling";
 import {
   SearchBar,
@@ -19,7 +18,12 @@ import {
   Divider,
   Pagination,
   Button,
-  ButtonGroup
+  ButtonGroup,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions
 } from "@mui/material";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
@@ -27,32 +31,38 @@ import * as XLSX from "xlsx";
 import DownloadIcon from "@mui/icons-material/Download";
 import PrintIcon from "@mui/icons-material/Print";
 
-const TampilTipe = () => {
+const TampilGroupCOA = () => {
   const { user, setting } = useContext(AuthContext);
   const location = useLocation();
   const id = location.pathname.split("/")[2];
   const { screenSize } = useStateContext();
 
   const [isFetchError, setIsFetchError] = useState(false);
-  const [kodeTipe, setKodeTipe] = useState("");
-  const [namaTipe, setNamaTipe] = useState("");
-  const [noRangka, setNoRangka] = useState("");
-  const [noMesin, setNoMesin] = useState("");
-  const [isi, setIsi] = useState("");
-  const [merk, setMerk] = useState("");
+  const [kodeJenisCOA, setKodeJenisCOA] = useState("");
+  const [namaJenisCOA, setNamaJenisCOA] = useState("");
+  const [kodeGroupCOA, setKodeGroupCOA] = useState("");
+  const [namaGroupCOA, setNamaGroupCOA] = useState("");
+
   const [searchTerm, setSearchTerm] = useState("");
-  const [tipesData, setTipesData] = useState([]);
-  const [tipesForDoc, setTipesForDoc] = useState([]);
+  const [groupCOAsData, setGroupCOAsData] = useState([]);
+  const [groupCOAsDataForDoc, setGroupCOAsDataForDoc] = useState([]);
   const navigate = useNavigate();
-  let isTipesExist = kodeTipe.length !== 0;
+  let isGroupCOAExist = kodeGroupCOA.length !== 0;
+  const [open, setOpen] = useState(false);
+
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
 
   const columns = [
-    { title: "Kode", field: "kodeTipe" },
-    { title: "Tipe / Merk", field: "namaTipe" },
-    { title: "No. Rangka", field: "noRangka" },
-    { title: "no. Mesin", field: "noMesin" },
-    { title: "Isi", field: "isi" },
-    { title: "Merk", field: "merk" }
+    { title: "Kode Jenis", field: "kodeJenisCOA" },
+    { title: "Nama Jenis", field: "namaJenisCOA" },
+    { title: "Kode Group COA", field: "kodeGroupCOA" },
+    { title: "Nama Group COA", field: "namaGroupCOA" }
   ];
 
   const [loading, setLoading] = useState(false);
@@ -62,16 +72,14 @@ const TampilTipe = () => {
   // Get current posts
   const indexOfLastPost = page * PER_PAGE;
   const indexOfFirstPost = indexOfLastPost - PER_PAGE;
-  const tempPosts = tipesData.filter((val) => {
+  const tempPosts = groupCOAsData.filter((val) => {
     if (searchTerm === "") {
       return val;
     } else if (
-      val.kodeTipe.toUpperCase().includes(searchTerm.toUpperCase()) ||
-      val.namaTipe.toUpperCase().includes(searchTerm.toUpperCase()) ||
-      val.noRangka.toUpperCase().includes(searchTerm.toUpperCase()) ||
-      val.noMesin.toUpperCase().includes(searchTerm.toUpperCase()) ||
-      val.isi.toUpperCase().includes(searchTerm.toUpperCase()) ||
-      val.merk.toUpperCase().includes(searchTerm.toUpperCase())
+      val.kodeJenisCOA.toUpperCase().includes(searchTerm.toUpperCase()) ||
+      val.namaJenisCOA.toUpperCase().includes(searchTerm.toUpperCase()) ||
+      val.kodeGroupCOA.toUpperCase().includes(searchTerm.toUpperCase()) ||
+      val.namaGroupCOA.toUpperCase().includes(searchTerm.toUpperCase())
     ) {
       return val;
     }
@@ -79,7 +87,7 @@ const TampilTipe = () => {
   const currentPosts = tempPosts.slice(indexOfFirstPost, indexOfLastPost);
 
   const count = Math.ceil(tempPosts.length / PER_PAGE);
-  const _DATA = usePagination(tipesData, PER_PAGE);
+  const _DATA = usePagination(groupCOAsData, PER_PAGE);
 
   const handleChange = (e, p) => {
     setPage(p);
@@ -87,64 +95,84 @@ const TampilTipe = () => {
   };
 
   useEffect(() => {
-    getTipesData();
-    getTipesForDoc();
-    id && getTipeById();
+    getGroupCOAsForDoc();
+    getGroupCOAsData();
+    id && getGroupCOAById();
   }, [id]);
 
-  const getTipesData = async () => {
+  const getGroupCOAsData = async () => {
     setLoading(true);
     try {
-      const allTipes = await axios.post(`${tempUrl}/tipes`, {
+      const allGroupCOAs = await axios.post(`${tempUrl}/groupCOAs`, {
         id: user._id,
         token: user.token
       });
-      setTipesData(allTipes.data);
+      setGroupCOAsData(allGroupCOAs.data);
     } catch (err) {
       setIsFetchError(true);
     }
     setLoading(false);
   };
 
-  const getTipesForDoc = async () => {
+  const getGroupCOAsForDoc = async () => {
     setLoading(true);
-    const allTipesForDoc = await axios.post(`${tempUrl}/tipesForDoc`, {
-      id: user._id,
-      token: user.token
-    });
-    setTipesForDoc(allTipesForDoc.data);
+    try {
+      const allGroupCOAsForDoc = await axios.post(
+        `${tempUrl}/groupCOAsForDoc`,
+        {
+          id: user._id,
+          token: user.token
+        }
+      );
+      setGroupCOAsDataForDoc(allGroupCOAsForDoc.data);
+    } catch (err) {
+      setIsFetchError(true);
+    }
     setLoading(false);
   };
 
-  const getTipeById = async () => {
+  const getGroupCOAById = async () => {
     if (id) {
-      const pickedTipe = await axios.post(`${tempUrl}/tipes/${id}`, {
+      const pickedGroupCOA = await axios.post(`${tempUrl}/groupCOAs/${id}`, {
         id: user._id,
         token: user.token
       });
-      setKodeTipe(pickedTipe.data.kodeTipe);
-      setNamaTipe(pickedTipe.data.namaTipe);
-      setNoRangka(pickedTipe.data.noRangka);
-      setNoMesin(pickedTipe.data.noMesin);
-      setIsi(pickedTipe.data.isi);
-      setMerk(pickedTipe.data.merk);
+      setKodeJenisCOA(pickedGroupCOA.data.kodeJenisCOA);
+      setNamaJenisCOA(pickedGroupCOA.data.namaJenisCOA);
+      setKodeGroupCOA(pickedGroupCOA.data.kodeGroupCOA);
+      setNamaGroupCOA(pickedGroupCOA.data.namaGroupCOA);
     }
   };
 
-  const deleteTipe = async (id) => {
-    setLoading(true);
-    await axios.post(`${tempUrl}/deleteTipe/${id}`, {
-      id: user._id,
-      token: user.token
-    });
-    setKodeTipe("");
-    setNamaTipe("");
-    setNoRangka("");
-    setNoMesin("");
-    setIsi("");
-    setMerk("");
-    setLoading(false);
-    navigate("/tipe");
+  const deleteGroupCOA = async (id) => {
+    const findSubGroupsKodeGroup = await axios.post(
+      `${tempUrl}/subGroupCOAsKodeGroup`,
+      {
+        kodeGroupCOA,
+        id: user._id,
+        token: user.token
+      }
+    );
+    if (findSubGroupsKodeGroup.data.length > 0) {
+      // There's Record -> Forbid Delete
+      handleClickOpen();
+    } else {
+      // No Record Found -> Delete
+      try {
+        setLoading(true);
+        await axios.post(`${tempUrl}/deleteGroupCOA/${id}`, {
+          id: user._id,
+          token: user.token
+        });
+        setKodeJenisCOA("");
+        setKodeGroupCOA("");
+        setNamaGroupCOA("");
+        setLoading(false);
+        navigate("/groupCOA");
+      } catch (error) {
+        console.log(error);
+      }
+    }
   };
 
   const downloadPdf = () => {
@@ -158,7 +186,7 @@ const TampilTipe = () => {
     doc.text(`${setting.namaPerusahaan} - ${setting.kotaPerusahaan}`, 15, 10);
     doc.text(`${setting.lokasiPerusahaan}`, 15, 15);
     doc.setFontSize(16);
-    doc.text(`Daftar Tipe`, 90, 30);
+    doc.text(`Daftar Group COA`, 85, 30);
     doc.setFontSize(10);
     doc.text(
       `Dicetak Oleh: ${user.username} | Tanggal : ${current_date} | Jam : ${current_time}`,
@@ -169,25 +197,25 @@ const TampilTipe = () => {
     doc.autoTable({
       startY: doc.pageCount > 1 ? doc.autoTableEndPosY() + 20 : 45,
       columns: columns.map((col) => ({ ...col, dataKey: col.field })),
-      body: tipesData,
+      body: groupCOAsDataForDoc,
       headStyles: {
         fillColor: [117, 117, 117],
         color: [0, 0, 0]
       }
     });
-    doc.save(`daftarTipe.pdf`);
+    doc.save(`daftarGroupCOA.pdf`);
   };
 
   const downloadExcel = () => {
-    const workSheet = XLSX.utils.json_to_sheet(tipesForDoc);
+    const workSheet = XLSX.utils.json_to_sheet(groupCOAsDataForDoc);
     const workBook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workBook, workSheet, `Tipe`);
+    XLSX.utils.book_append_sheet(workBook, workSheet, `Group COA`);
     // Buffer
     let buf = XLSX.write(workBook, { bookType: "xlsx", type: "buffer" });
     // Binary String
     XLSX.write(workBook, { bookType: "xlsx", type: "binary" });
     // Download
-    XLSX.writeFile(workBook, `daftarTipe.xlsx`);
+    XLSX.writeFile(workBook, `daftarGroupCOA.xlsx`);
   };
 
   if (loading) {
@@ -202,7 +230,7 @@ const TampilTipe = () => {
     <Box sx={container}>
       <Typography color="#757575">Master</Typography>
       <Typography variant="h4" sx={subTitleText}>
-        Tipe/Merk
+        Group COA
       </Typography>
       <Box sx={downloadButtons}>
         <ButtonGroup variant="outlined" color="secondary">
@@ -214,22 +242,38 @@ const TampilTipe = () => {
           </Button>
         </ButtonGroup>
       </Box>
+      <Dialog
+        open={open}
+        onClose={handleClose}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">{`Tidak bisa dihapus karena sudah ada data!`}</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-slide-description">
+            {`Nama Group COA data: ${namaGroupCOA}`}
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose}>Cancel</Button>
+        </DialogActions>
+      </Dialog>
       <Box sx={buttonModifierContainer}>
         <ButtonModifier
           id={id}
-          kode={kodeTipe}
-          addLink={`/tipe/tambahTipe`}
-          editLink={`/tipe/${id}/edit`}
-          deleteUser={deleteTipe}
-          nameUser={kodeTipe}
+          kode={kodeGroupCOA}
+          addLink={`/groupCOA/tambahGroupCOA`}
+          editLink={`/groupCOA/${id}/edit`}
+          deleteUser={deleteGroupCOA}
+          nameUser={kodeGroupCOA}
         />
       </Box>
       <Divider sx={dividerStyle} />
-      {isTipesExist && (
+      {isGroupCOAExist && (
         <>
           <Box sx={showDataContainer}>
             <Box sx={showDataWrapper}>
-              <Typography sx={labelInput}>Kode</Typography>
+              <Typography sx={labelInput}>Kode Jenis</Typography>
               <TextField
                 size="small"
                 id="outlined-basic"
@@ -237,9 +281,9 @@ const TampilTipe = () => {
                 InputProps={{
                   readOnly: true
                 }}
-                value={kodeTipe}
+                value={`${kodeJenisCOA} - ${namaJenisCOA}`}
               />
-              <Typography sx={[labelInput, spacingTop]}>Nama Tipe</Typography>
+              <Typography sx={[labelInput, spacingTop]}>NamaJenis</Typography>
               <TextField
                 size="small"
                 id="outlined-basic"
@@ -247,21 +291,11 @@ const TampilTipe = () => {
                 InputProps={{
                   readOnly: true
                 }}
-                value={namaTipe}
-              />
-              <Typography sx={[labelInput, spacingTop]}>No. Rangka</Typography>
-              <TextField
-                size="small"
-                id="outlined-basic"
-                variant="filled"
-                InputProps={{
-                  readOnly: true
-                }}
-                value={noRangka}
+                value={namaJenisCOA}
               />
             </Box>
             <Box sx={[showDataWrapper, secondWrapper]}>
-              <Typography sx={labelInput}>No. Mesin</Typography>
+              <Typography sx={labelInput}>Kode Group</Typography>
               <TextField
                 size="small"
                 id="outlined-basic"
@@ -269,9 +303,11 @@ const TampilTipe = () => {
                 InputProps={{
                   readOnly: true
                 }}
-                value={noMesin}
+                value={kodeGroupCOA}
               />
-              <Typography sx={[labelInput, spacingTop]}>Isi</Typography>
+              <Typography sx={[labelInput, spacingTop]}>
+                Nama Group COA
+              </Typography>
               <TextField
                 size="small"
                 id="outlined-basic"
@@ -279,17 +315,7 @@ const TampilTipe = () => {
                 InputProps={{
                   readOnly: true
                 }}
-                value={isi}
-              />
-              <Typography sx={[labelInput, spacingTop]}>Merk</Typography>
-              <TextField
-                size="small"
-                id="outlined-basic"
-                variant="filled"
-                InputProps={{
-                  readOnly: true
-                }}
-                value={merk}
+                value={namaGroupCOA}
               />
             </Box>
           </Box>
@@ -300,7 +326,10 @@ const TampilTipe = () => {
         <SearchBar setSearchTerm={setSearchTerm} />
       </Box>
       <Box sx={tableContainer}>
-        <ShowTableTipe currentPosts={currentPosts} searchTerm={searchTerm} />
+        <ShowTableGroupCOA
+          currentPosts={currentPosts}
+          searchTerm={searchTerm}
+        />
       </Box>
       <Box sx={tableContainer}>
         <Pagination
@@ -315,7 +344,7 @@ const TampilTipe = () => {
   );
 };
 
-export default TampilTipe;
+export default TampilGroupCOA;
 
 const container = {
   p: 4
@@ -339,10 +368,7 @@ const dividerStyle = {
 const showDataContainer = {
   mt: 4,
   display: "flex",
-  flexDirection: {
-    xs: "column",
-    sm: "row"
-  }
+  flexWrap: "wrap"
 };
 
 const showDataWrapper = {
@@ -375,6 +401,13 @@ const spacingTop = {
   mt: 4
 };
 
+const downloadButtons = {
+  mt: 4,
+  display: "flex",
+  flexWrap: "wrap",
+  justifyContent: "center"
+};
+
 const secondWrapper = {
   marginLeft: {
     sm: 4
@@ -383,11 +416,4 @@ const secondWrapper = {
     sm: 0,
     xs: 4
   }
-};
-
-const downloadButtons = {
-  mt: 4,
-  display: "flex",
-  flexWrap: "wrap",
-  justifyContent: "center"
 };

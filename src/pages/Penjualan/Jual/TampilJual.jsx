@@ -9,7 +9,7 @@ import {
   SearchBar,
   Loader,
   usePagination,
-  ButtonModifierJual,
+  ButtonModifierJual
 } from "../../../components";
 import {
   Box,
@@ -24,7 +24,7 @@ import {
   FormLabel,
   RadioGroup,
   FormControlLabel,
-  Radio,
+  Radio
 } from "@mui/material";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
@@ -115,7 +115,7 @@ const TampilJual = () => {
     { title: "Tanggal Jual", field: "tanggalJual" },
     { title: "Nama Register", field: "namaRegister" },
     { title: "Kode Leasing", field: "kodeLeasing" },
-    { title: "Tipe", field: "tipe" },
+    { title: "Tipe", field: "tipe" }
   ];
 
   const [loading, setLoading] = useState(false);
@@ -173,7 +173,7 @@ const TampilJual = () => {
       {
         id: user._id,
         token: user.token,
-        kodeCabang: user.cabang._id,
+        kodeCabang: user.cabang._id
       }
     );
     setKecamatans(allKecamatansForTable.data);
@@ -184,7 +184,7 @@ const TampilJual = () => {
     setLoading(true);
     const allTipesMainInfo = await axios.post(`${tempUrl}/tipesMainInfo`, {
       id: user._id,
-      token: user.token,
+      token: user.token
     });
     setTipes(allTipesMainInfo.data);
     setLoading(false);
@@ -198,7 +198,7 @@ const TampilJual = () => {
         sampaiTgl: user.periode.periodeAkhir,
         id: user._id,
         token: user.token,
-        kodeCabang: user.cabang._id,
+        kodeCabang: user.cabang._id
       });
       setJualsData(allJuals.data);
     } catch (err) {
@@ -212,7 +212,7 @@ const TampilJual = () => {
     const allJualsForTable = await axios.post(`${tempUrl}/jualsForTable`, {
       id: user._id,
       token: user.token,
-      kodeCabang: user.cabang._id,
+      kodeCabang: user.cabang._id
     });
     setJualsForTable(allJualsForTable.data);
     setLoading(false);
@@ -223,7 +223,7 @@ const TampilJual = () => {
     const allJualsForDoc = await axios.post(`${tempUrl}/jualsForDoc`, {
       id: user._id,
       token: user.token,
-      kodeCabang: user.cabang._id,
+      kodeCabang: user.cabang._id
     });
     setJualsForDoc(allJualsForDoc.data);
     setLoading(false);
@@ -233,7 +233,7 @@ const TampilJual = () => {
     if (id) {
       const response = await axios.post(`${tempUrl}/juals/${id}`, {
         id: user._id,
-        token: user.token,
+        token: user.token
       });
       // Data Register/Pembeli
       setNoRegister(response.data.noRegister);
@@ -293,7 +293,7 @@ const TampilJual = () => {
         noRangka,
         id: user._id,
         token: user.token,
-        kodeCabang: user.cabang._id,
+        kodeCabang: user.cabang._id
       });
       // Update Stok
       await axios.post(`${tempUrl}/updateDaftarStok/${tempStok.data._id}`, {
@@ -301,20 +301,20 @@ const TampilJual = () => {
         tanggalJual: "",
         id: user._id,
         token: user.token,
-        kodeCabang: user.cabang._id,
+        kodeCabang: user.cabang._id
       });
       if (kodeAngsuran) {
         // Delete Angsuran
         await axios.post(`${tempUrl}/deleteAngsuran/${kodeAngsuran}`, {
           id: user._id,
           token: user.token,
-          kodeCabang: user.cabang._id,
+          kodeCabang: user.cabang._id
         });
       }
       await axios.post(`${tempUrl}/deleteJual/${id}`, {
         id: user._id,
         token: user.token,
-        kodeCabang: user.cabang._id,
+        kodeCabang: user.cabang._id
       });
       // Data Register/Pembeli
       setNoRegister("");
@@ -405,8 +405,8 @@ const TampilJual = () => {
       body: jualsForTable,
       headStyles: {
         fillColor: [117, 117, 117],
-        color: [0, 0, 0],
-      },
+        color: [0, 0, 0]
+      }
     });
     doc.save(`daftarJual.pdf`);
   };
@@ -416,7 +416,7 @@ const TampilJual = () => {
       noRangka,
       id: user._id,
       token: user.token,
-      kodeCabang: user.cabang._id,
+      kodeCabang: user.cabang._id
     });
 
     var date = new Date();
@@ -474,7 +474,7 @@ const TampilJual = () => {
       noRangka,
       id: user._id,
       token: user.token,
-      kodeCabang: user.cabang._id,
+      kodeCabang: user.cabang._id
     });
     let makeTglAng1 = new Date(tglAng);
     let makeTglAngAkhir = new Date(tglAngAkhir);
@@ -573,13 +573,13 @@ const TampilJual = () => {
       noRangka,
       id: user._id,
       token: user.token,
-      kodeCabang: user.cabang._id,
+      kodeCabang: user.cabang._id
     });
     const tempRegister = await axios.post(`${tempUrl}/registersByNo`, {
       noRegister,
       id: user._id,
       token: user.token,
-      kodeCabang: user.cabang._id,
+      kodeCabang: user.cabang._id
     });
     let tempY = 21;
     let makeTglAng1 = new Date(tglAng);
@@ -591,7 +591,7 @@ const TampilJual = () => {
       "Rabu",
       "Kamis",
       "Jumat",
-      "Sabtu",
+      "Sabtu"
     ];
     let thisDayNumber = makeTglAng1.getDate();
     let thisDay = myDays[makeTglAng1.getDate()];
@@ -787,7 +787,7 @@ const TampilJual = () => {
                 <FormControlLabel
                   value="kwitansiUmTunai"
                   control={<Radio />}
-                  label="Kwitansi UM Tunai"
+                  label="Kwitansi Penjualan Tunai"
                 />
               </>
             )}
@@ -849,7 +849,7 @@ const TampilJual = () => {
                     variant="filled"
                     value={noJual}
                     InputProps={{
-                      readOnly: true,
+                      readOnly: true
                     }}
                   />
                   <Typography sx={[labelInput, spacingTop]}>
@@ -861,7 +861,7 @@ const TampilJual = () => {
                     variant="filled"
                     value={noKwitansi}
                     InputProps={{
-                      readOnly: true,
+                      readOnly: true
                     }}
                   />
                   <Typography sx={[labelInput, spacingTop]}>
@@ -873,7 +873,7 @@ const TampilJual = () => {
                     variant="filled"
                     value={tglJual}
                     InputProps={{
-                      readOnly: true,
+                      readOnly: true
                     }}
                   />
                   <Typography sx={[labelInput, spacingTop]}>
@@ -885,7 +885,7 @@ const TampilJual = () => {
                     variant="filled"
                     value={jenisJual}
                     InputProps={{
-                      readOnly: true,
+                      readOnly: true
                     }}
                   />
                 </Box>
@@ -897,7 +897,7 @@ const TampilJual = () => {
                     variant="filled"
                     value={tglAng}
                     InputProps={{
-                      readOnly: true,
+                      readOnly: true
                     }}
                   />
                   <Typography sx={[labelInput, spacingTop]}>
@@ -909,7 +909,7 @@ const TampilJual = () => {
                     variant="filled"
                     value={tglAngAkhir}
                     InputProps={{
-                      readOnly: true,
+                      readOnly: true
                     }}
                   />
                 </Box>
@@ -930,7 +930,7 @@ const TampilJual = () => {
                     variant="filled"
                     value={noRegister}
                     InputProps={{
-                      readOnly: true,
+                      readOnly: true
                     }}
                   />
                   <Typography sx={[labelInput, spacingTop]}>
@@ -942,7 +942,7 @@ const TampilJual = () => {
                     variant="filled"
                     value={namaRegister}
                     InputProps={{
-                      readOnly: true,
+                      readOnly: true
                     }}
                   />
                   <Typography sx={[labelInput, spacingTop]}>
@@ -954,7 +954,7 @@ const TampilJual = () => {
                     variant="filled"
                     value={almRegister}
                     InputProps={{
-                      readOnly: true,
+                      readOnly: true
                     }}
                   />
                   <Typography sx={[labelInput, spacingTop]}>
@@ -966,7 +966,7 @@ const TampilJual = () => {
                     variant="filled"
                     value={almKantor}
                     InputProps={{
-                      readOnly: true,
+                      readOnly: true
                     }}
                   />
                   <Typography sx={[labelInput, spacingTop]}>
@@ -978,7 +978,7 @@ const TampilJual = () => {
                     variant="filled"
                     value={tlpRegister}
                     InputProps={{
-                      readOnly: true,
+                      readOnly: true
                     }}
                   />
                   <Typography sx={[labelInput, spacingTop]}>
@@ -990,7 +990,7 @@ const TampilJual = () => {
                     variant="filled"
                     value={noKtpRegister}
                     InputProps={{
-                      readOnly: true,
+                      readOnly: true
                     }}
                   />
                   <Typography sx={[labelInput, spacingTop]}>
@@ -1002,7 +1002,7 @@ const TampilJual = () => {
                     variant="filled"
                     value={noKKRegister}
                     InputProps={{
-                      readOnly: true,
+                      readOnly: true
                     }}
                   />
                   <Typography sx={[labelInput, spacingTop]}>
@@ -1014,7 +1014,7 @@ const TampilJual = () => {
                     variant="filled"
                     value={namaPjmRegister}
                     InputProps={{
-                      readOnly: true,
+                      readOnly: true
                     }}
                   />
                   <Typography sx={[labelInput, spacingTop]}>
@@ -1026,7 +1026,7 @@ const TampilJual = () => {
                     variant="filled"
                     value={noKtpPjmRegister}
                     InputProps={{
-                      readOnly: true,
+                      readOnly: true
                     }}
                   />
                 </Box>
@@ -1038,7 +1038,7 @@ const TampilJual = () => {
                     variant="filled"
                     value={namaRefRegister}
                     InputProps={{
-                      readOnly: true,
+                      readOnly: true
                     }}
                   />
                   <Typography sx={[labelInput, spacingTop]}>
@@ -1050,7 +1050,7 @@ const TampilJual = () => {
                     variant="filled"
                     value={almRefRegister}
                     InputProps={{
-                      readOnly: true,
+                      readOnly: true
                     }}
                   />
                   <Typography sx={[labelInput, spacingTop]}>
@@ -1062,7 +1062,7 @@ const TampilJual = () => {
                     variant="filled"
                     value={tlpRefRegister}
                     InputProps={{
-                      readOnly: true,
+                      readOnly: true
                     }}
                   />
                   <Typography sx={[labelInput, spacingTop]}>
@@ -1074,7 +1074,7 @@ const TampilJual = () => {
                     variant="filled"
                     value={`${kodeMarketing.kodeMarketing} - ${kodeMarketing.namaMarketing}`}
                     InputProps={{
-                      readOnly: true,
+                      readOnly: true
                     }}
                   />
                   <Typography sx={[labelInput, spacingTop]}>
@@ -1086,7 +1086,7 @@ const TampilJual = () => {
                     variant="filled"
                     value={`${kodeSurveyor.kodeSurveyor} - ${kodeSurveyor.namaSurveyor}`}
                     InputProps={{
-                      readOnly: true,
+                      readOnly: true
                     }}
                   />
                   <Typography sx={[labelInput, spacingTop]}>
@@ -1098,7 +1098,7 @@ const TampilJual = () => {
                     variant="filled"
                     value={`${kodePekerjaan.kodePekerjaan} - ${kodePekerjaan.namaPekerjaan}`}
                     InputProps={{
-                      readOnly: true,
+                      readOnly: true
                     }}
                   />
                   <Typography sx={[labelInput, spacingTop]}>
@@ -1110,7 +1110,7 @@ const TampilJual = () => {
                     variant="filled"
                     value={`${kodeKecamatan.kodeKecamatan} - ${kodeKecamatan.namaKecamatan}`}
                     InputProps={{
-                      readOnly: true,
+                      readOnly: true
                     }}
                   />
                   <Typography sx={[labelInput, spacingTop]}>
@@ -1122,7 +1122,7 @@ const TampilJual = () => {
                     variant="filled"
                     value={`${kodeLeasing.kodeLeasing} - ${kodeLeasing.namaLeasing}`}
                     InputProps={{
-                      readOnly: true,
+                      readOnly: true
                     }}
                   />
                 </Box>
@@ -1143,7 +1143,7 @@ const TampilJual = () => {
                     variant="filled"
                     value={nopol}
                     InputProps={{
-                      readOnly: true,
+                      readOnly: true
                     }}
                   />
                   <Typography sx={[labelInput, spacingTop]}>
@@ -1155,7 +1155,7 @@ const TampilJual = () => {
                     variant="filled"
                     value={noRangka}
                     InputProps={{
-                      readOnly: true,
+                      readOnly: true
                     }}
                   />
                   <Typography sx={[labelInput, spacingTop]}>
@@ -1167,7 +1167,7 @@ const TampilJual = () => {
                     variant="filled"
                     value={noMesin}
                     InputProps={{
-                      readOnly: true,
+                      readOnly: true
                     }}
                   />
                 </Box>
@@ -1181,7 +1181,7 @@ const TampilJual = () => {
                       .filter((tipe1) => tipe1.kodeTipe === tipe)
                       .map((sup) => `${sup.namaTipe}`)}`}
                     InputProps={{
-                      readOnly: true,
+                      readOnly: true
                     }}
                   />
                   <Typography sx={[labelInput, spacingTop]}>
@@ -1193,7 +1193,7 @@ const TampilJual = () => {
                     variant="filled"
                     value={namaWarna}
                     InputProps={{
-                      readOnly: true,
+                      readOnly: true
                     }}
                   />
                   <Typography sx={[labelInput, spacingTop]}>
@@ -1205,7 +1205,7 @@ const TampilJual = () => {
                     variant="filled"
                     value={tahun}
                     InputProps={{
-                      readOnly: true,
+                      readOnly: true
                     }}
                   />
                 </Box>
@@ -1232,7 +1232,7 @@ const TampilJual = () => {
                     variant="filled"
                     value={hargaTunai}
                     InputProps={{
-                      readOnly: true,
+                      readOnly: true
                     }}
                   />
                   <Typography sx={[labelInput, spacingTop]}>
@@ -1248,7 +1248,7 @@ const TampilJual = () => {
                     variant="filled"
                     value={uangMuka}
                     InputProps={{
-                      readOnly: true,
+                      readOnly: true
                     }}
                   />
                   <Typography sx={[labelInput, spacingTop]}>
@@ -1263,7 +1263,7 @@ const TampilJual = () => {
                     variant="filled"
                     value={sisaPiutang}
                     InputProps={{
-                      readOnly: true,
+                      readOnly: true
                     }}
                   />
                 </Box>
@@ -1280,7 +1280,7 @@ const TampilJual = () => {
                     variant="filled"
                     value={angPerBulan}
                     InputProps={{
-                      readOnly: true,
+                      readOnly: true
                     }}
                   />
                   <Typography sx={[labelInput, spacingTop]}>
@@ -1295,7 +1295,7 @@ const TampilJual = () => {
                     variant="filled"
                     value={tenor}
                     InputProps={{
-                      readOnly: true,
+                      readOnly: true
                     }}
                   />
                   <Typography sx={[labelInput, spacingTop]}>
@@ -1310,7 +1310,7 @@ const TampilJual = () => {
                     variant="filled"
                     value={jumlahPiutang}
                     InputProps={{
-                      readOnly: true,
+                      readOnly: true
                     }}
                   />
                 </Box>
@@ -1347,22 +1347,22 @@ const TampilJual = () => {
 export default TampilJual;
 
 const container = {
-  p: 4,
+  p: 4
 };
 
 const subTitleText = {
-  fontWeight: "900",
+  fontWeight: "900"
 };
 
 const buttonModifierContainer = {
   mt: 4,
   display: "flex",
   flexWrap: "wrap",
-  justifyContent: "center",
+  justifyContent: "center"
 };
 
 const dividerStyle = {
-  pt: 4,
+  pt: 4
 };
 
 const showDataContainer = {
@@ -1370,8 +1370,8 @@ const showDataContainer = {
   display: "flex",
   flexDirection: {
     xs: "column",
-    sm: "row",
-  },
+    sm: "row"
+  }
 };
 
 const showDataWrapper = {
@@ -1379,46 +1379,46 @@ const showDataWrapper = {
   flex: 1,
   flexDirection: "column",
   maxWidth: {
-    md: "40vw",
-  },
+    md: "40vw"
+  }
 };
 
 const searchBarContainer = {
   pt: 6,
   display: "flex",
-  justifyContent: "center",
+  justifyContent: "center"
 };
 
 const tableContainer = {
   pt: 4,
   display: "flex",
-  justifyContent: "center",
+  justifyContent: "center"
 };
 
 const labelInput = {
   fontWeight: "600",
-  marginLeft: 1,
+  marginLeft: 1
 };
 
 const spacingTop = {
-  mt: 4,
+  mt: 4
 };
 
 const secondWrapper = {
   marginLeft: {
-    sm: 4,
+    sm: 4
   },
   marginTop: {
     sm: 0,
-    xs: 4,
-  },
+    xs: 4
+  }
 };
 
 const downloadButtons = {
   mt: 4,
   display: "flex",
   flexWrap: "wrap",
-  justifyContent: "center",
+  justifyContent: "center"
 };
 
 const mainContainer = {
@@ -1426,12 +1426,12 @@ const mainContainer = {
   borderRadius: "20px",
   margin: {
     sm: 0,
-    md: 4,
+    md: 4
   },
   marginTop: {
     xs: 4,
-    md: 0,
-  },
+    md: 0
+  }
 };
 
 const pilihCetakContainer = {
@@ -1439,27 +1439,27 @@ const pilihCetakContainer = {
   borderRadius: "20px",
   margin: {
     sm: 0,
-    md: 4,
+    md: 4
   },
-  marginTop: 2,
+  marginTop: 2
 };
 
 const titleStyle = {
   textAlign: "center",
-  fontWeight: "600",
+  fontWeight: "600"
 };
 
 const contentContainer = {
   p: {
     sm: 0,
-    md: 3,
+    md: 3
   },
   pt: {
     sm: 0,
-    md: 1,
+    md: 1
   },
   mt: {
     sm: 0,
-    md: 2,
-  },
+    md: 2
+  }
 };

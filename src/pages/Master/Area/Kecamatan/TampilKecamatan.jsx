@@ -18,7 +18,12 @@ import {
   Divider,
   Pagination,
   Button,
-  ButtonGroup
+  ButtonGroup,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions
 } from "@mui/material";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
@@ -42,6 +47,15 @@ const TampilKecamatan = () => {
   const [kecamatansForDoc, setKecamatansForDoc] = useState([]);
   const navigate = useNavigate();
   let isKecamatanExist = kodeKecamatan.length !== 0;
+  const [open, setOpen] = useState(false);
+
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
 
   const columns = [
     { title: "Kode Wilayah", field: "kodeWilayah" },
@@ -126,20 +140,42 @@ const TampilKecamatan = () => {
   };
 
   const deleteKecamatan = async (id) => {
-    try {
-      setLoading(true);
-      await axios.post(`${tempUrl}/deleteKecamatan/${id}`, {
+    const findRegisterKecamatan = await axios.post(
+      `${tempUrl}/registersKecamatan`,
+      {
+        kecamatanId: id,
         id: user._id,
         token: user.token
-      });
-      setKodeWilayah("");
-      setNamaWilayah("");
-      setKodeKecamatan("");
-      setNamaKecamatan("");
-      setLoading(false);
-      navigate("/kecamatan");
-    } catch (error) {
-      console.log(error);
+      }
+    );
+    const findJualKecamatan = await axios.post(`${tempUrl}/jualsKecamatan`, {
+      kodeKecamatan: id,
+      id: user._id,
+      token: user.token
+    });
+    let isKecamatanDataExist =
+      findRegisterKecamatan.data.length > 0 ||
+      findJualKecamatan.data.length > 0;
+    if (isKecamatanDataExist) {
+      // There's Record -> Forbid Delete
+      handleClickOpen();
+    } else {
+      // No Record Found -> Delete
+      try {
+        setLoading(true);
+        await axios.post(`${tempUrl}/deleteKecamatan/${id}`, {
+          id: user._id,
+          token: user.token
+        });
+        setKodeWilayah("");
+        setNamaWilayah("");
+        setKodeKecamatan("");
+        setNamaKecamatan("");
+        setLoading(false);
+        navigate("/kecamatan");
+      } catch (error) {
+        console.log(error);
+      }
     }
   };
 
@@ -200,6 +236,22 @@ const TampilKecamatan = () => {
       <Typography variant="h4" sx={subTitleText}>
         Kecamatan
       </Typography>
+      <Dialog
+        open={open}
+        onClose={handleClose}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">{`Tidak bisa dihapus karena sudah ada data!`}</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-slide-description">
+            {`Kode Kecamatan data: ${kodeKecamatan}`}
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose}>Cancel</Button>
+        </DialogActions>
+      </Dialog>
       <Box sx={downloadButtons}>
         <ButtonGroup variant="outlined" color="secondary">
           <Button startIcon={<PrintIcon />} onClick={() => downloadPdf()}>

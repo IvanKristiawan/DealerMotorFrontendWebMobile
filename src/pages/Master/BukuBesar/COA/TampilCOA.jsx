@@ -52,7 +52,7 @@ const TampilCOA = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();
   let isCOAExist = kodeCOA.length !== 0;
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = useState(false);
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -162,9 +162,51 @@ const TampilCOA = () => {
         token: user.token,
         kodeCabang: user.cabang._id
       });
+      let findKasMasukCoa = await axios.post(`${tempUrl}/kasMasuksCoa`, {
+        COAId: id,
+        id: user._id,
+        token: user.token,
+        kodeCabang: user.cabang._id
+      });
+      let findKasKeluarCoa = await axios.post(`${tempUrl}/kasKeluarsCoa`, {
+        COAId: id,
+        id: user._id,
+        token: user.token,
+        kodeCabang: user.cabang._id
+      });
+      let findBankMasukCoa = await axios.post(`${tempUrl}/bankMasuksCoa`, {
+        COAId: id,
+        id: user._id,
+        token: user.token,
+        kodeCabang: user.cabang._id
+      });
+      let findBankKeluarCoa = await axios.post(`${tempUrl}/bankKeluarsCoa`, {
+        COAId: id,
+        id: user._id,
+        token: user.token,
+        kodeCabang: user.cabang._id
+      });
+      let findBiayaPerawatanCoa = await axios.post(
+        `${tempUrl}/biayaPerawatansCoa`,
+        {
+          COAId: id,
+          id: user._id,
+          token: user.token,
+          kodeCabang: user.cabang._id
+        }
+      );
+      let coaDataExist =
+        findKasMasukCoa.data.length > 0 ||
+        findKasKeluarCoa.data.length > 0 ||
+        findBankMasukCoa.data.length > 0 ||
+        findBankKeluarCoa.data.length > 0 ||
+        findBiayaPerawatanCoa.data.length > 0;
       if (findCOARecord.data.length > 0) {
         // There's Record -> Forbid Delete
         setBulan(findCOARecord.data[0].bulan);
+        handleClickOpen();
+      } else if (coaDataExist) {
+        // There's Record -> Forbid Delete
         handleClickOpen();
       } else {
         // No Record Found -> Delete

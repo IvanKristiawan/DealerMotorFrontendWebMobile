@@ -12,23 +12,15 @@ const Header = () => {
 
   const container = {
     height: screenSize >= 650 ? "65px" : "90px",
-    backgroundColor: "black",
+    backgroundColor: "black"
   };
 
   const contained = {
     display: "flex",
-    justifyContent: "space-around",
     flexDirection: screenSize >= 650 ? "row" : "column",
     paddingLeft: "50px",
     paddingRight: "50px",
-    paddingTop: "10px",
-  };
-
-  const titleStyle = {
-    color: "white",
-    textDecoration: "none",
-    fontSize: screenSize >= 650 ? "20px" : "16px",
-    paddingTop: "8px",
+    paddingTop: "10px"
   };
 
   return (
@@ -52,6 +44,13 @@ const Header = () => {
 
 export default Header;
 
+const titleStyle = {
+  color: "white",
+  textDecoration: "none",
+  fontSize: "20px",
+  paddingTop: "8px"
+};
+
 const wrapper = {
-  display: "flex",
+  display: "flex"
 };

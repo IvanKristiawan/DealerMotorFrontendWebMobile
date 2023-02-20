@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import { AuthContext } from "../../../contexts/AuthContext";
 import { tempUrl } from "../../../contexts/ContextProvider";
@@ -13,11 +13,12 @@ import {
   Divider,
   Snackbar,
   Alert,
-  Paper
+  Paper,
+  Autocomplete
 } from "@mui/material";
-import SaveIcon from "@mui/icons-material/Save";
+import EditIcon from "@mui/icons-material/Edit";
 
-const TambahRegister = () => {
+const UbahRegister = () => {
   const { user } = useContext(AuthContext);
   const [open, setOpen] = useState(false);
   const [kodeRegister, setKodeRegister] = useState("");
@@ -27,18 +28,23 @@ const TambahRegister = () => {
   const [noKtpRegister, setNoKtpRegister] = useState("");
   const [almKtpRegister, setAlmKtpRegister] = useState("");
   const [noKKRegister, setNoKKRegister] = useState("");
-  const [pkjRegister, setPkjRegister] = useState("");
   const [namaPjmRegister, setNamaPjmRegister] = useState("");
   const [almPjmRegister, setAlmPjmRegister] = useState("");
   const [tlpPjmRegister, setTlpPjmRegister] = useState("");
   const [hubunganRegister, setHubunganRegister] = useState("");
   const [noKtpPjmRegister, setNoKtpPjmRegister] = useState("");
-  const [pkjPjmRegister, setPkjPjmRegister] = useState("");
   const [namaRefRegister, setNamaRefRegister] = useState("");
   const [almRefRegister, setAlmRefRegister] = useState("");
   const [tlpRefRegister, setTlpRefRegister] = useState("");
+  const [kecamatanId, setKecamatanId] = useState("");
+  const [pekerjaanId, setPekerjaanId] = useState("");
+  const [pekerjaanPenjaminId, setPekerjaanPenjaminId] = useState("");
+
+  const [kecamatans, setKecamatans] = useState([]);
+  const [pekerjaans, setPekerjaans] = useState([]);
   const [error, setError] = useState(false);
   const navigate = useNavigate();
+  const { id } = useParams();
   const [loading, setLoading] = useState(false);
 
   const handleClose = (event, reason) => {
@@ -48,22 +54,76 @@ const TambahRegister = () => {
     setOpen(false);
   };
 
+  const kecamatanOptions = kecamatans.map((kecamatan) => ({
+    label: `${kecamatan.kodeKecamatan} - ${kecamatan.namaKecamatan}`
+  }));
+
+  const pekerjaanOptions = pekerjaans.map((pekerjaan) => ({
+    label: `${pekerjaan.kodePekerjaan} - ${pekerjaan.namaPekerjaan}`
+  }));
+
   useEffect(() => {
-    getNextKodeRegister();
+    getRegisterById();
+    getKecamatan();
+    getPekerjaan();
   }, []);
 
-  const getNextKodeRegister = async () => {
+  const getKecamatan = async () => {
     setLoading(true);
-    const nextKodeRegister = await axios.post(`${tempUrl}/registersNextKode`, {
+    const allKecamatans = await axios.post(`${tempUrl}/kecamatans`, {
       id: user._id,
       token: user.token,
       kodeCabang: user.cabang._id
     });
-    setKodeRegister(nextKodeRegister.data);
+    setKecamatans(allKecamatans.data);
     setLoading(false);
   };
 
-  const saveRegister = async (e) => {
+  const getPekerjaan = async () => {
+    setLoading(true);
+    const allPekerjaans = await axios.post(`${tempUrl}/pekerjaans`, {
+      id: user._id,
+      token: user.token,
+      kodeCabang: user.cabang._id
+    });
+    setPekerjaans(allPekerjaans.data);
+    setLoading(false);
+  };
+
+  const getRegisterById = async () => {
+    setLoading(true);
+    const pickedRegister = await axios.post(`${tempUrl}/registers/${id}`, {
+      id: user._id,
+      token: user.token
+    });
+    setKodeRegister(pickedRegister.data.noRegister);
+    setNamaRegister(pickedRegister.data.namaRegister);
+    setAlmRegister(pickedRegister.data.almRegister);
+    setTlpRegister(pickedRegister.data.tlpRegister);
+    setNoKtpRegister(pickedRegister.data.noKtpRegister);
+    setAlmKtpRegister(pickedRegister.data.almKtpRegister);
+    setNoKKRegister(pickedRegister.data.noKKRegister);
+    setNamaPjmRegister(pickedRegister.data.namaPjmRegister);
+    setAlmPjmRegister(pickedRegister.data.almPjmRegister);
+    setTlpPjmRegister(pickedRegister.data.tlpPjmRegister);
+    setHubunganRegister(pickedRegister.data.hubunganRegister);
+    setNoKtpPjmRegister(pickedRegister.data.noKtpPjmRegister);
+    setNamaRefRegister(pickedRegister.data.namaRefRegister);
+    setAlmRefRegister(pickedRegister.data.almRefRegister);
+    setTlpRefRegister(pickedRegister.data.tlpRefRegister);
+    setPekerjaanId(
+      `${pickedRegister.data.pekerjaanId.kodePekerjaan} - ${pickedRegister.data.pekerjaanId.namaPekerjaan}`
+    );
+    setPekerjaanPenjaminId(
+      `${pickedRegister.data.pekerjaanPenjaminId.kodePekerjaan} - ${pickedRegister.data.pekerjaanPenjaminId.namaPekerjaan}`
+    );
+    setKecamatanId(
+      `${pickedRegister.data.kecamatanId.kodeKecamatan} - ${pickedRegister.data.kecamatanId.namaKecamatan}`
+    );
+    setLoading(false);
+  };
+
+  const updateUser = async (e) => {
     e.preventDefault();
     var date = new Date();
     var current_date =
@@ -78,39 +138,61 @@ const TambahRegister = () => {
       noKtpRegister.length === 0 ||
       almKtpRegister.length === 0 ||
       noKKRegister.length === 0 ||
-      pkjRegister.length === 0;
+      pekerjaanId.length === 0;
     if (isFailedValidation) {
       setError(true);
       setOpen(!open);
     } else {
       try {
         setLoading(true);
-        await axios.post(`${tempUrl}/saveRegister`, {
+        const findKecamatan = await axios.post(`${tempUrl}/kecamatanByKode`, {
+          kodeKecamatan: kecamatanId.split(" ", 1)[0],
+          id: user._id,
+          token: user.token,
+          kodeCabang: user.cabang._id
+        });
+        const findPekerjaan = await axios.post(`${tempUrl}/pekerjaanByKode`, {
+          kodePekerjaan: pekerjaanId.split(" ", 1)[0],
+          id: user._id,
+          token: user.token,
+          kodeCabang: user.cabang._id
+        });
+        const findPekerjaanPenjamin = await axios.post(
+          `${tempUrl}/pekerjaanByKode`,
+          {
+            kodePekerjaan: pekerjaanPenjaminId.split(" ", 1)[0],
+            id: user._id,
+            token: user.token,
+            kodeCabang: user.cabang._id
+          }
+        );
+        await axios.post(`${tempUrl}/updateRegister/${id}`, {
           namaRegister,
           almRegister,
           tlpRegister,
           noKtpRegister,
           almKtpRegister,
           noKKRegister,
-          pkjRegister,
           namaPjmRegister,
           almPjmRegister,
           tlpPjmRegister,
           hubunganRegister,
           noKtpPjmRegister,
-          pkjPjmRegister,
           namaRefRegister,
           almRefRegister,
           tlpRefRegister,
-          tglInput: current_date,
-          jamInput: current_time,
-          userInput: user.username,
+          kecamatanId: findKecamatan.data._id,
+          pekerjaanId: findPekerjaan.data._id,
+          pekerjaanPenjaminId: findPekerjaanPenjamin.data._id,
+          tglUpdate: current_date,
+          jamUpdate: current_time,
+          userUpdate: user.username,
           kodeCabang: user.cabang._id,
           id: user._id,
           token: user.token
         });
         setLoading(false);
-        navigate("/register");
+        navigate(`/register/${id}`);
       } catch (error) {
         console.log(error);
       }
@@ -123,9 +205,9 @@ const TambahRegister = () => {
 
   return (
     <Box sx={container}>
-      <Typography color="#757575">Master</Typography>
+      <Typography color="#757575">Penjualan</Typography>
       <Typography variant="h4" sx={subTitleText}>
-        Tambah Register Penjualan
+        Ubah Register
       </Typography>
       <Divider sx={dividerStyle} />
       <Paper sx={contentContainer} elevation={12}>
@@ -222,16 +304,48 @@ const TambahRegister = () => {
               onChange={(e) => setNoKKRegister(e.target.value.toUpperCase())}
             />
             <Typography sx={[labelInput, spacingTop]}>Pekerjaan</Typography>
-            <TextField
+            <Autocomplete
               size="small"
-              error={error && pkjRegister.length === 0 && true}
-              helperText={
-                error && pkjRegister.length === 0 && "Pekerjaan harus diisi!"
-              }
-              id="outlined-basic"
-              variant="outlined"
-              value={pkjRegister}
-              onChange={(e) => setPkjRegister(e.target.value.toUpperCase())}
+              disablePortal
+              id="combo-box-demo"
+              options={pekerjaanOptions}
+              renderInput={(params) => (
+                <TextField
+                  size="small"
+                  error={error && pekerjaanId.length === 0 && true}
+                  helperText={
+                    error &&
+                    pekerjaanId.length === 0 &&
+                    "Kode Pekerjaan harus diisi!"
+                  }
+                  {...params}
+                />
+              )}
+              value={{ label: pekerjaanId }}
+              onInputChange={(e, value) => setPekerjaanId(value)}
+            />
+            <Typography sx={[labelInput, spacingTop]}>
+              Kode Kecamatan
+            </Typography>
+            <Autocomplete
+              size="small"
+              disablePortal
+              id="combo-box-demo"
+              options={kecamatanOptions}
+              renderInput={(params) => (
+                <TextField
+                  size="small"
+                  error={error && kecamatanId.length === 0 && true}
+                  helperText={
+                    error &&
+                    kecamatanId.length === 0 &&
+                    "Kode Kecamatan harus diisi!"
+                  }
+                  {...params}
+                />
+              )}
+              value={{ label: kecamatanId }}
+              onInputChange={(e, value) => setKecamatanId(value)}
             />
           </Box>
           <Box sx={[showDataWrapper, secondWrapper]}>
@@ -290,12 +404,14 @@ const TambahRegister = () => {
             <Typography sx={[labelInput, spacingTop]}>
               Pekerjaan Penjamin
             </Typography>
-            <TextField
+            <Autocomplete
               size="small"
-              id="outlined-basic"
-              variant="outlined"
-              value={pkjPjmRegister}
-              onChange={(e) => setPkjPjmRegister(e.target.value.toUpperCase())}
+              disablePortal
+              id="combo-box-demo"
+              options={pekerjaanOptions}
+              renderInput={(params) => <TextField size="small" {...params} />}
+              value={{ label: pekerjaanPenjaminId }}
+              onInputChange={(e, value) => setPekerjaanPenjaminId(value)}
             />
             <Typography sx={[labelInput, spacingTop]}>
               Nama Referensi
@@ -341,14 +457,14 @@ const TambahRegister = () => {
           </Button>
           <Button
             variant="contained"
-            startIcon={<SaveIcon />}
-            onClick={saveRegister}
+            startIcon={<EditIcon />}
+            onClick={updateUser}
           >
-            Simpan
+            Ubah
           </Button>
         </Box>
       </Paper>
-      <Divider sx={spacingTop} />
+      <Divider sx={dividerStyle} />
       {error && (
         <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>
           <Alert onClose={handleClose} severity="error" sx={alertBox}>
@@ -360,7 +476,7 @@ const TambahRegister = () => {
   );
 };
 
-export default TambahRegister;
+export default UbahRegister;
 
 const container = {
   p: 4

@@ -564,7 +564,7 @@ const UbahUser = () => {
           </Box>
         </Box>
       </Paper>
-      {user.tipeUser !== "ADM" && (
+      {user.tipeUser === "MGR" && (
         <Paper sx={contentContainer} elevation={12}>
           <Typography variant="h5" sx={[labelInput, spacingTop]}>
             Atur Hak Akses

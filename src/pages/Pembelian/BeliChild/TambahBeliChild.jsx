@@ -40,6 +40,7 @@ const TambahBeliChild = () => {
   const [namaStnk, setNamaStnk] = useState("");
   const [inputTglStnk, setInputTglStnk] = useState(new Date());
   const [jenisABeli, setJenisABeli] = useState("");
+  const [ppnBeli, setPpnBeli] = useState("");
   const [hargaSatuan, setHargaSatuan] = useState("");
   const [ppnABeli, setPpnABeli] = useState("");
   const [tanggalBeli, setTanggalBeli] = useState("");
@@ -124,6 +125,7 @@ const TambahBeliChild = () => {
       token: user.token
     });
     setJenisABeli(allBelis.data.jenisBeli);
+    setPpnBeli(allBelis.data.isPpnBeli);
     setTanggalBeli(allBelis.data.tanggalBeli);
     setKodeSupplier(allBelis.data.supplier._id);
 
@@ -429,7 +431,11 @@ const TambahBeliChild = () => {
               id="outlined-basic"
               variant="outlined"
               value={tahun}
-              onChange={(e) => setTahun(e.target.value.toUpperCase())}
+              onChange={(e) => {
+                if (e.target.value.toString().length <= 4) {
+                  setTahun(e.target.value.toUpperCase());
+                }
+              }}
             />
             <Typography sx={[labelInput, spacingTop]}>Nama Warna</Typography>
             <Autocomplete
@@ -630,7 +636,11 @@ const TambahBeliChild = () => {
                 value={hargaSatuan}
                 onChange={(e) => {
                   setHargaSatuan(e.target.value);
-                  setPpnABeli(e.target.value * setting.PPN);
+                  if (ppnBeli) {
+                    setPpnABeli(e.target.value * setting.PPN);
+                  } else {
+                    setPpnABeli(0);
+                  }
                 }}
               />
             </Box>

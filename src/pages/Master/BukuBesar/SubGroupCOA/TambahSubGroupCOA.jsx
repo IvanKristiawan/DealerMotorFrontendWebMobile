@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { AuthContext } from "../../../../contexts/AuthContext";
 import { tempUrl } from "../../../../contexts/ContextProvider";
@@ -13,19 +13,22 @@ import {
   Divider,
   Snackbar,
   Alert,
+  Autocomplete,
   Paper
 } from "@mui/material";
-import EditIcon from "@mui/icons-material/Edit";
+import SaveIcon from "@mui/icons-material/Save";
 
-const UbahGroupCOA = () => {
+const TambahSubGroupCOA = () => {
   const { user } = useContext(AuthContext);
   const [open, setOpen] = useState(false);
-  const [kodeJenisCOA, setKodeJenisCOA] = useState("");
+  const [kodeGroupCOA, setKodeGroupCOA] = useState("");
   const [namaGroupCOA, setNamaGroupCOA] = useState("");
+  const [kodeSubGroupCOA, setKodeSubGroupCOA] = useState("");
+  const [namaSubGroupCOA, setNamaSubGroupCOA] = useState("");
+  const [groupCOAsData, setGroupCOAsData] = useState([]);
 
   const [error, setError] = useState(false);
   const navigate = useNavigate();
-  const { id } = useParams();
   const [loading, setLoading] = useState(false);
 
   const handleClose = (event, reason) => {
@@ -36,23 +39,31 @@ const UbahGroupCOA = () => {
   };
 
   useEffect(() => {
-    getGroupById();
+    getGroupCOAsData();
   }, []);
 
-  const getGroupById = async () => {
+  const getGroupCOAsData = async () => {
     setLoading(true);
-    const pickedGroupCOA = await axios.post(`${tempUrl}/groupCOAs/${id}`, {
+    const allGroupCOAs = await axios.post(`${tempUrl}/groupCOAs`, {
       id: user._id,
-      token: user.token
+      token: user.token,
+      kodeCabang: user.cabang._id
     });
-    setKodeJenisCOA(
-      `${pickedGroupCOA.data.kodeJenisCOA} - ${pickedGroupCOA.data.namaJenisCOA}`
-    );
-    setNamaGroupCOA(pickedGroupCOA.data.namaGroupCOA);
+    setGroupCOAsData(allGroupCOAs.data);
     setLoading(false);
   };
 
-  const updateGroupCOA = async (e) => {
+  const getSubGroupCOAsNextKode = async (kodeGroupCOA) => {
+    const subGroupCoa = await axios.post(`${tempUrl}/subGroupCOAsNextKode`, {
+      kodeGroupCOA,
+      id: user._id,
+      token: user.token,
+      kodeCabang: user.cabang._id
+    });
+    setKodeSubGroupCOA(subGroupCoa.data);
+  };
+
+  const saveSubGroupCOA = async (e) => {
     e.preventDefault();
     var date = new Date();
     var current_date =
@@ -60,29 +71,36 @@ const UbahGroupCOA = () => {
     var current_time =
       date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds();
 
-    let isFailValidation = namaGroupCOA.length === 0;
+    let isFailValidation =
+      kodeGroupCOA.length === 0 || namaSubGroupCOA.length === 0;
     if (isFailValidation) {
       setError(true);
       setOpen(!open);
     } else {
       try {
         setLoading(true);
-        await axios.post(`${tempUrl}/updateGroupCOA/${id}`, {
+        await axios.post(`${tempUrl}/saveSubGroupCOA`, {
+          kodeGroupCOA,
           namaGroupCOA,
-          tglUpdate: current_date,
-          jamUpdate: current_time,
-          userUpdate: user.username,
+          namaSubGroupCOA,
+          tglInput: current_date,
+          jamInput: current_time,
+          userInput: user.username,
           kodeCabang: user.cabang._id,
           id: user._id,
           token: user.token
         });
         setLoading(false);
-        navigate(`/groupCOA/${id}`);
+        navigate("/subGroupCOA");
       } catch (error) {
         console.log(error);
       }
     }
   };
+
+  const groupCOAOptions = groupCOAsData.map((groupCOA) => ({
+    label: `${groupCOA.kodeGroupCOA} - ${groupCOA.namaGroupCOA}`
+  }));
 
   if (loading) {
     return <Loader />;
@@ -92,38 +110,64 @@ const UbahGroupCOA = () => {
     <Box sx={container}>
       <Typography color="#757575">Master</Typography>
       <Typography variant="h4" sx={subTitleText}>
-        Ubah Group COA
+        Tambah Sub Group COA
       </Typography>
       <Divider sx={dividerStyle} />
       <Paper sx={contentContainer} elevation={12}>
         <Box sx={showDataContainer}>
           <Box sx={showDataWrapper}>
-            <Typography sx={labelInput}>Kode Jenis COA</Typography>
+            <Typography sx={labelInput}>Kode Group COA</Typography>
+            <Autocomplete
+              size="small"
+              disablePortal
+              id="combo-box-demo"
+              options={groupCOAOptions}
+              renderInput={(params) => (
+                <TextField
+                  size="small"
+                  error={error && kodeGroupCOA.length === 0 && true}
+                  helperText={
+                    error &&
+                    kodeGroupCOA.length === 0 &&
+                    "Kode Group harus diisi!"
+                  }
+                  {...params}
+                />
+              )}
+              onInputChange={(e, value) => {
+                setKodeGroupCOA(value.split(" ", 1)[0]);
+                setNamaGroupCOA(value.split("- ")[1]);
+                getSubGroupCOAsNextKode(value.split(" ", 1)[0]);
+              }}
+            />
+            <Typography sx={[labelInput, spacingTop]}>
+              Kode Sub Group COA
+            </Typography>
             <TextField
               size="small"
               id="outlined-basic"
+              value={kodeSubGroupCOA}
               variant="outlined"
-              value={kodeJenisCOA}
               InputProps={{
                 readOnly: true
               }}
               sx={{ backgroundColor: Colors.grey400 }}
             />
             <Typography sx={[labelInput, spacingTop]}>
-              Nama Group COA
+              Nama Sub Group COA
             </Typography>
             <TextField
               size="small"
-              error={error && namaGroupCOA.length === 0 && true}
+              error={error && namaSubGroupCOA.length === 0 && true}
               helperText={
                 error &&
-                namaGroupCOA.length === 0 &&
-                "Nama Group COA harus diisi!"
+                namaSubGroupCOA.length === 0 &&
+                "Nama Sub Group harus diisi!"
               }
               id="outlined-basic"
               variant="outlined"
-              value={namaGroupCOA}
-              onChange={(e) => setNamaGroupCOA(e.target.value.toUpperCase())}
+              value={namaSubGroupCOA}
+              onChange={(e) => setNamaSubGroupCOA(e.target.value.toUpperCase())}
             />
           </Box>
         </Box>
@@ -131,21 +175,21 @@ const UbahGroupCOA = () => {
           <Button
             variant="outlined"
             color="secondary"
-            onClick={() => navigate("/groupCOA")}
+            onClick={() => navigate("/subGroupCOA")}
             sx={{ marginRight: 2 }}
           >
             {"< Kembali"}
           </Button>
           <Button
             variant="contained"
-            startIcon={<EditIcon />}
-            onClick={updateGroupCOA}
+            startIcon={<SaveIcon />}
+            onClick={saveSubGroupCOA}
           >
-            Ubah
+            Simpan
           </Button>
         </Box>
       </Paper>
-      <Divider sx={dividerStyle} />
+      <Divider sx={spacingTop} />
       {error && (
         <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>
           <Alert onClose={handleClose} severity="error" sx={alertBox}>
@@ -157,7 +201,7 @@ const UbahGroupCOA = () => {
   );
 };
 
-export default UbahGroupCOA;
+export default TambahSubGroupCOA;
 
 const container = {
   p: 4

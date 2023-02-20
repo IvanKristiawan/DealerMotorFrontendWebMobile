@@ -1,16 +1,16 @@
 import React, { useState, useEffect, useContext } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
-import { AuthContext } from "../../../../contexts/AuthContext";
-import { tempUrl, useStateContext } from "../../../../contexts/ContextProvider";
-import { ShowTableSubGroupCOA } from "../../../../components/ShowTable";
-import { FetchErrorHandling } from "../../../../components/FetchErrorHandling";
+import { AuthContext } from "../../../contexts/AuthContext";
+import { tempUrl, useStateContext } from "../../../contexts/ContextProvider";
+import { ShowTableLeasing } from "../../../components/ShowTable";
+import { FetchErrorHandling } from "../../../components/FetchErrorHandling";
 import {
   SearchBar,
   Loader,
   usePagination,
   ButtonModifier
-} from "../../../../components";
+} from "../../../components";
 import {
   Box,
   TextField,
@@ -18,7 +18,12 @@ import {
   Divider,
   Pagination,
   Button,
-  ButtonGroup
+  ButtonGroup,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions
 } from "@mui/material";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
@@ -26,28 +31,39 @@ import * as XLSX from "xlsx";
 import DownloadIcon from "@mui/icons-material/Download";
 import PrintIcon from "@mui/icons-material/Print";
 
-const TampilSubGroupCOA = () => {
-  const { user } = useContext(AuthContext);
+const TampilLeasing = () => {
+  const { user, setting, dispatch } = useContext(AuthContext);
   const location = useLocation();
   const id = location.pathname.split("/")[2];
   const { screenSize } = useStateContext();
 
   const [isFetchError, setIsFetchError] = useState(false);
-  const [kodeGroupCOA, setKodeGroupCOA] = useState("");
-  const [namaGroupCOA, setNamaGroupCOA] = useState("");
-  const [kodeSubGroupCOA, setKodeSubGroupCOA] = useState("");
-  const [namaSubGroupCOA, setNamaSubGroupCOA] = useState("");
-
+  const [kodeLeasing, setKodeLeasing] = useState("");
+  const [namaLeasing, setNamaLeasing] = useState("");
+  const [alamatLeasing, setAlamatLeasing] = useState("");
+  const [teleponLeasing, setTeleponLeasing] = useState("");
+  const [picLeasing, setPicLeasing] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
-  const [subGroupCOAsData, setSubGroupCOAsData] = useState([]);
-  const [subGroupCOAsForDoc, setSubGroupCOAsForDoc] = useState([]);
+  const [leasingsData, setLeasingsData] = useState([]);
+  const [leasingsForDoc, setLeasingsForDoc] = useState([]);
   const navigate = useNavigate();
-  let isSubGroupCOAExist = kodeSubGroupCOA.length !== 0;
+  let isLeasingExist = kodeLeasing.length !== 0;
+  const [open, setOpen] = useState(false);
+
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
 
   const columns = [
-    { title: "Kode Group", field: "kodeGroupCOA" },
-    { title: "Kode Sub Group COA", field: "kodeSubGroupCOA" },
-    { title: "Nama Sub Group COA", field: "namaSubGroupCOA" }
+    { title: "Kode", field: "kodeLeasing" },
+    { title: "Nama Leasing", field: "namaLeasing" },
+    { title: "Alamat", field: "alamatLeasing" },
+    { title: "Telepon", field: "teleponLeasing" },
+    { title: "PIC", field: "picLeasing" }
   ];
 
   const [loading, setLoading] = useState(false);
@@ -57,14 +73,15 @@ const TampilSubGroupCOA = () => {
   // Get current posts
   const indexOfLastPost = page * PER_PAGE;
   const indexOfFirstPost = indexOfLastPost - PER_PAGE;
-  const tempPosts = subGroupCOAsData.filter((val) => {
+  const tempPosts = leasingsData.filter((val) => {
     if (searchTerm === "") {
       return val;
     } else if (
-      val.kodeGroupCOA.toUpperCase().includes(searchTerm.toUpperCase()) ||
-      val.namaGroupCOA.toUpperCase().includes(searchTerm.toUpperCase()) ||
-      val.kodeSubGroupCOA.toUpperCase().includes(searchTerm.toUpperCase()) ||
-      val.namaSubGroupCOA.toUpperCase().includes(searchTerm.toUpperCase())
+      val._id.toUpperCase().includes(searchTerm.toUpperCase()) ||
+      val.namaLeasing.toUpperCase().includes(searchTerm.toUpperCase()) ||
+      val.alamatLeasing.toUpperCase().includes(searchTerm.toUpperCase()) ||
+      val.teleponLeasing.toUpperCase().includes(searchTerm.toUpperCase()) ||
+      val.picLeasing.toUpperCase().includes(searchTerm.toUpperCase())
     ) {
       return val;
     }
@@ -72,7 +89,7 @@ const TampilSubGroupCOA = () => {
   const currentPosts = tempPosts.slice(indexOfFirstPost, indexOfLastPost);
 
   const count = Math.ceil(tempPosts.length / PER_PAGE);
-  const _DATA = usePagination(subGroupCOAsData, PER_PAGE);
+  const _DATA = usePagination(leasingsData, PER_PAGE);
 
   const handleChange = (e, p) => {
     setPage(p);
@@ -80,73 +97,80 @@ const TampilSubGroupCOA = () => {
   };
 
   useEffect(() => {
-    getSubGroupCOAsForDoc();
-    getSubGroupCOAsData();
-    id && getSubGroupCOAById();
+    getLeasingsForDoc();
+    getLeasingsData();
+    id && getLeasingById();
   }, [id]);
 
-  const getSubGroupCOAsData = async () => {
+  const getLeasingsData = async () => {
     setLoading(true);
     try {
-      const allSubGroupCOAs = await axios.post(`${tempUrl}/subGroupCOAs`, {
+      const allLeasings = await axios.post(`${tempUrl}/leasings`, {
         id: user._id,
         token: user.token
       });
-      setSubGroupCOAsData(allSubGroupCOAs.data);
+      setLeasingsData(allLeasings.data);
     } catch (err) {
       setIsFetchError(true);
     }
     setLoading(false);
   };
 
-  const getSubGroupCOAsForDoc = async () => {
+  const getLeasingsForDoc = async () => {
     setLoading(true);
     try {
-      const allSubGroupCOAsForDoc = await axios.post(
-        `${tempUrl}/subGroupCOAsForDoc`,
-        {
-          id: user._id,
-          token: user.token
-        }
-      );
-      setSubGroupCOAsForDoc(allSubGroupCOAsForDoc.data);
+      const allLeasingsForDoc = await axios.post(`${tempUrl}/leasingsForDoc`, {
+        id: user._id,
+        token: user.token
+      });
+      setLeasingsForDoc(allLeasingsForDoc.data);
     } catch (err) {
       setIsFetchError(true);
     }
     setLoading(false);
   };
 
-  const getSubGroupCOAById = async () => {
+  const getLeasingById = async () => {
     if (id) {
-      const pickedSubGroupCOA = await axios.post(
-        `${tempUrl}/subGroupCOAs/${id}`,
-        {
-          id: user._id,
-          token: user.token
-        }
-      );
-      setKodeGroupCOA(pickedSubGroupCOA.data.kodeGroupCOA);
-      setNamaGroupCOA(pickedSubGroupCOA.data.namaGroupCOA);
-      setKodeSubGroupCOA(pickedSubGroupCOA.data.kodeSubGroupCOA);
-      setNamaSubGroupCOA(pickedSubGroupCOA.data.namaSubGroupCOA);
-    }
-  };
-
-  const deleteSubGroupCOA = async (id) => {
-    try {
-      setLoading(true);
-      await axios.post(`${tempUrl}/deleteSubGroupCOA/${id}`, {
+      const pickedLeasing = await axios.post(`${tempUrl}/leasings/${id}`, {
         id: user._id,
         token: user.token
       });
-      setKodeGroupCOA("");
-      setKodeSubGroupCOA("");
-      setNamaGroupCOA("");
-      setNamaSubGroupCOA("");
-      setLoading(false);
-      navigate("/subGroupCOA");
-    } catch (error) {
-      console.log(error);
+      setKodeLeasing(pickedLeasing.data.kodeLeasing);
+      setNamaLeasing(pickedLeasing.data.namaLeasing);
+      setAlamatLeasing(pickedLeasing.data.alamatLeasing);
+      setTeleponLeasing(pickedLeasing.data.teleponLeasing);
+      setPicLeasing(pickedLeasing.data.picLeasing);
+    }
+  };
+
+  const deleteLeasing = async (id) => {
+    const findJualLeasing = await axios.post(`${tempUrl}/jualsLeasing`, {
+      kodeLeasing: id,
+      id: user._id,
+      token: user.token
+    });
+    if (findJualLeasing.data.length > 0) {
+      // There's Record -> Forbid Delete
+      handleClickOpen();
+    } else {
+      // No Record Found -> Delete
+      try {
+        setLoading(true);
+        await axios.post(`${tempUrl}/deleteLeasing/${id}`, {
+          id: user._id,
+          token: user.token
+        });
+        setKodeLeasing("");
+        setNamaLeasing("");
+        setAlamatLeasing("");
+        setTeleponLeasing("");
+        setPicLeasing("");
+        setLoading(false);
+        navigate("/leasing");
+      } catch (error) {
+        console.log(error);
+      }
     }
   };
 
@@ -161,7 +185,7 @@ const TampilSubGroupCOA = () => {
     doc.text(`${setting.namaPerusahaan} - ${setting.kotaPerusahaan}`, 15, 10);
     doc.text(`${setting.lokasiPerusahaan}`, 15, 15);
     doc.setFontSize(16);
-    doc.text(`Daftar Sub Group COA`, 85, 30);
+    doc.text(`Daftar Leasing`, 90, 30);
     doc.setFontSize(10);
     doc.text(
       `Dicetak Oleh: ${user.username} | Tanggal : ${current_date} | Jam : ${current_time}`,
@@ -172,25 +196,25 @@ const TampilSubGroupCOA = () => {
     doc.autoTable({
       startY: doc.pageCount > 1 ? doc.autoTableEndPosY() + 20 : 45,
       columns: columns.map((col) => ({ ...col, dataKey: col.field })),
-      body: subGroupCOAsForDoc,
+      body: leasingsForDoc,
       headStyles: {
         fillColor: [117, 117, 117],
         color: [0, 0, 0]
       }
     });
-    doc.save(`daftarSubGroupCOA.pdf`);
+    doc.save(`daftarLeasing.pdf`);
   };
 
   const downloadExcel = () => {
-    const workSheet = XLSX.utils.json_to_sheet(subGroupCOAsForDoc);
+    const workSheet = XLSX.utils.json_to_sheet(leasingsForDoc);
     const workBook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workBook, workSheet, `Sub Group COA`);
+    XLSX.utils.book_append_sheet(workBook, workSheet, `Leasing`);
     // Buffer
     let buf = XLSX.write(workBook, { bookType: "xlsx", type: "buffer" });
     // Binary String
     XLSX.write(workBook, { bookType: "xlsx", type: "binary" });
     // Download
-    XLSX.writeFile(workBook, `daftarSubGroupCOA.xlsx`);
+    XLSX.writeFile(workBook, `daftarLeasing.xlsx`);
   };
 
   if (loading) {
@@ -205,8 +229,24 @@ const TampilSubGroupCOA = () => {
     <Box sx={container}>
       <Typography color="#757575">Master</Typography>
       <Typography variant="h4" sx={subTitleText}>
-        Sub Group COA
+        Leasing
       </Typography>
+      <Dialog
+        open={open}
+        onClose={handleClose}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">{`Tidak bisa dihapus karena sudah ada data!`}</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-slide-description">
+            {`Nama Leasing data: ${namaLeasing}`}
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose}>Cancel</Button>
+        </DialogActions>
+      </Dialog>
       <Box sx={downloadButtons}>
         <ButtonGroup variant="outlined" color="secondary">
           <Button startIcon={<PrintIcon />} onClick={() => downloadPdf()}>
@@ -220,19 +260,19 @@ const TampilSubGroupCOA = () => {
       <Box sx={buttonModifierContainer}>
         <ButtonModifier
           id={id}
-          kode={kodeSubGroupCOA}
-          addLink={`/subGroupCOA/tambahSubGroupCOA`}
-          editLink={`/subGroupCOA/${id}/edit`}
-          deleteUser={deleteSubGroupCOA}
-          nameUser={kodeSubGroupCOA}
+          kode={kodeLeasing}
+          addLink={`/leasing/tambahLeasing`}
+          editLink={`/leasing/${id}/edit`}
+          deleteUser={deleteLeasing}
+          nameUser={kodeLeasing}
         />
       </Box>
       <Divider sx={dividerStyle} />
-      {isSubGroupCOAExist && (
+      {isLeasingExist && (
         <>
           <Box sx={showDataContainer}>
             <Box sx={showDataWrapper}>
-              <Typography sx={labelInput}>Kode Group COA</Typography>
+              <Typography sx={labelInput}>Kode</Typography>
               <TextField
                 size="small"
                 id="outlined-basic"
@@ -240,10 +280,10 @@ const TampilSubGroupCOA = () => {
                 InputProps={{
                   readOnly: true
                 }}
-                value={`${kodeGroupCOA} - ${namaGroupCOA}`}
+                value={kodeLeasing}
               />
               <Typography sx={[labelInput, spacingTop]}>
-                Kode Sub Group
+                Nama Leasing
               </Typography>
               <TextField
                 size="small"
@@ -252,11 +292,9 @@ const TampilSubGroupCOA = () => {
                 InputProps={{
                   readOnly: true
                 }}
-                value={kodeSubGroupCOA}
+                value={namaLeasing}
               />
-              <Typography sx={[labelInput, spacingTop]}>
-                Nama Sub Group
-              </Typography>
+              <Typography sx={[labelInput, spacingTop]}>Alamat</Typography>
               <TextField
                 size="small"
                 id="outlined-basic"
@@ -264,7 +302,29 @@ const TampilSubGroupCOA = () => {
                 InputProps={{
                   readOnly: true
                 }}
-                value={namaSubGroupCOA}
+                value={alamatLeasing}
+              />
+            </Box>
+            <Box sx={[showDataWrapper, secondWrapper]}>
+              <Typography sx={labelInput}>Telepon</Typography>
+              <TextField
+                size="small"
+                id="outlined-basic"
+                variant="filled"
+                InputProps={{
+                  readOnly: true
+                }}
+                value={teleponLeasing}
+              />
+              <Typography sx={[labelInput, spacingTop]}>PIC</Typography>
+              <TextField
+                size="small"
+                id="outlined-basic"
+                variant="filled"
+                InputProps={{
+                  readOnly: true
+                }}
+                value={picLeasing}
               />
             </Box>
           </Box>
@@ -275,10 +335,7 @@ const TampilSubGroupCOA = () => {
         <SearchBar setSearchTerm={setSearchTerm} />
       </Box>
       <Box sx={tableContainer}>
-        <ShowTableSubGroupCOA
-          currentPosts={currentPosts}
-          searchTerm={searchTerm}
-        />
+        <ShowTableLeasing currentPosts={currentPosts} searchTerm={searchTerm} />
       </Box>
       <Box sx={tableContainer}>
         <Pagination
@@ -293,7 +350,7 @@ const TampilSubGroupCOA = () => {
   );
 };
 
-export default TampilSubGroupCOA;
+export default TampilLeasing;
 
 const container = {
   p: 4
@@ -317,7 +374,10 @@ const dividerStyle = {
 const showDataContainer = {
   mt: 4,
   display: "flex",
-  flexWrap: "wrap"
+  flexDirection: {
+    xs: "column",
+    sm: "row"
+  }
 };
 
 const showDataWrapper = {
@@ -348,6 +408,16 @@ const labelInput = {
 
 const spacingTop = {
   mt: 4
+};
+
+const secondWrapper = {
+  marginLeft: {
+    sm: 4
+  },
+  marginTop: {
+    sm: 0,
+    xs: 4
+  }
 };
 
 const downloadButtons = {

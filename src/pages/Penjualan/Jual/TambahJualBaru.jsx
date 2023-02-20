@@ -18,14 +18,12 @@ import {
   Dialog,
   DialogTitle,
   DialogActions,
-  DialogContent,
-  DialogContentText,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
-  TableRow,
+  TableRow
 } from "@mui/material";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -36,18 +34,18 @@ const useStyles = makeStyles({
   root: {
     "& .MuiTableCell-head": {
       color: "white",
-      backgroundColor: Colors.blue700,
-    },
+      backgroundColor: Colors.blue700
+    }
   },
   tableRightBorder: {
     borderWidth: 0,
     borderRightWidth: 1,
     borderColor: "white",
-    borderStyle: "solid",
-  },
+    borderStyle: "solid"
+  }
 });
 
-const TambahJualBekas = () => {
+const TambahJualBaru = () => {
   const { user } = useContext(AuthContext);
   const [open, setOpen] = useState(false);
   // Data Register/Pembeli
@@ -109,15 +107,6 @@ const TambahJualBekas = () => {
   const [loading, setLoading] = useState(false);
   const [searchTermRegister, setSearchTermRegister] = useState("");
   const [openRegister, setOpenRegister] = useState(false);
-  const [openAlert, setOpenAlert] = useState(false);
-
-  const handleClickOpenAlert = () => {
-    setOpenAlert(true);
-  };
-
-  const handleCloseAlert = () => {
-    setOpenAlert(false);
-  };
 
   const classes = useStyles();
 
@@ -139,27 +128,27 @@ const TambahJualBekas = () => {
   const jenisJualOption = [{ label: "TUNAI" }, { label: "KREDIT" }];
 
   const marketingOptions = marketings.map((marketing) => ({
-    label: `${marketing.kodeMarketing} - ${marketing.namaMarketing}`,
+    label: `${marketing.kodeMarketing} - ${marketing.namaMarketing}`
   }));
 
   const surveyorOptions = surveyors.map((surveyor) => ({
-    label: `${surveyor.kodeSurveyor} - ${surveyor.namaSurveyor}`,
+    label: `${surveyor.kodeSurveyor} - ${surveyor.namaSurveyor}`
   }));
 
   const pekerjaanOptions = pekerjaans.map((pekerjaan) => ({
-    label: `${pekerjaan.kodePekerjaan} - ${pekerjaan.namaPekerjaan}`,
+    label: `${pekerjaan.kodePekerjaan} - ${pekerjaan.namaPekerjaan}`
   }));
 
   const kecamatanOptions = kecamatans.map((kecamatan) => ({
-    label: `${kecamatan.kodeKecamatan} - ${kecamatan.namaKecamatan}`,
+    label: `${kecamatan.kodeKecamatan} - ${kecamatan.namaKecamatan}`
   }));
 
   const leasingOptions = leasings.map((leasing) => ({
-    label: `${leasing.kodeLeasing} - ${leasing.namaLeasing}`,
+    label: `${leasing.kodeLeasing} - ${leasing.namaLeasing}`
   }));
 
-  const nopolOptions = stoks.map((stok) => ({
-    label: `${stok.nopol}`,
+  const norangOptions = stoks.map((stok) => ({
+    label: `${stok.noRangka}`
   }));
 
   const tempPostsRegister = registers.filter((val) => {
@@ -185,12 +174,12 @@ const TambahJualBekas = () => {
     var calculatedDateResult =
       finalDate.getDate().toLocaleString("en-US", {
         minimumIntegerDigits: 2,
-        useGrouping: false,
+        useGrouping: false
       }) +
       "-" +
       (finalDate.getMonth() + 1).toLocaleString("en-US", {
         minimumIntegerDigits: 2,
-        useGrouping: false,
+        useGrouping: false
       }) +
       "-" +
       finalDate.getFullYear();
@@ -227,37 +216,36 @@ const TambahJualBekas = () => {
     }
   };
 
-  const getStoksByNopol = async (nopol) => {
-    const allDaftarStoksByNopol = await axios.post(
-      `${tempUrl}/daftarStoksByNopol`,
+  const getStoksByNorang = async (noRangka) => {
+    const allDaftarStokByNorang = await axios.post(
+      `${tempUrl}/daftarStoksByNorang`,
       {
-        nopol,
+        noRangka,
         id: user._id,
         token: user.token,
-        kodeCabang: user.cabang._id,
+        kodeCabang: user.cabang._id
       }
     );
-    if (allDaftarStoksByNopol.data) {
-      setNoRangka(allDaftarStoksByNopol.data.noRangka);
-      setNoMesin(allDaftarStoksByNopol.data.noMesin);
-      setTipe(allDaftarStoksByNopol.data.tipe);
-      setNamaWarna(allDaftarStoksByNopol.data.namaWarna);
-      setTahun(allDaftarStoksByNopol.data.tahun);
+    if (allDaftarStokByNorang.data) {
+      setNoMesin(allDaftarStokByNorang.data.noMesin);
+      setTipe(allDaftarStokByNorang.data.tipe);
+      setNamaWarna(allDaftarStokByNorang.data.namaWarna);
+      setTahun(allDaftarStokByNorang.data.tahun);
     }
-    setNopol(nopol);
+    setNoRangka(noRangka);
   };
 
   const getStok = async () => {
     setLoading(true);
-    const allDaftarStokHasNopol = await axios.post(
-      `${tempUrl}/daftarStoksNopol`,
+    const allDaftarStokHasNorang = await axios.post(
+      `${tempUrl}/daftarStoksNorang`,
       {
         id: user._id,
         token: user.token,
-        kodeCabang: user.cabang._id,
+        kodeCabang: user.cabang._id
       }
     );
-    setStoks(allDaftarStokHasNopol.data);
+    setStoks(allDaftarStokHasNorang.data);
     setLoading(false);
   };
 
@@ -266,7 +254,7 @@ const TambahJualBekas = () => {
     const allRegisters = await axios.post(`${tempUrl}/registers`, {
       id: user._id,
       token: user.token,
-      kodeCabang: user.cabang._id,
+      kodeCabang: user.cabang._id
     });
     setRegisters(allRegisters.data);
     setLoading(false);
@@ -277,7 +265,7 @@ const TambahJualBekas = () => {
     const allMarketings = await axios.post(`${tempUrl}/marketings`, {
       id: user._id,
       token: user.token,
-      kodeCabang: user.cabang._id,
+      kodeCabang: user.cabang._id
     });
     setMarketings(allMarketings.data);
     setLoading(false);
@@ -288,7 +276,7 @@ const TambahJualBekas = () => {
     const allSurveyors = await axios.post(`${tempUrl}/surveyors`, {
       id: user._id,
       token: user.token,
-      kodeCabang: user.cabang._id,
+      kodeCabang: user.cabang._id
     });
     setSurveyors(allSurveyors.data);
     setLoading(false);
@@ -299,7 +287,7 @@ const TambahJualBekas = () => {
     const allPekerjaans = await axios.post(`${tempUrl}/pekerjaans`, {
       id: user._id,
       token: user.token,
-      kodeCabang: user.cabang._id,
+      kodeCabang: user.cabang._id
     });
     setPekerjaans(allPekerjaans.data);
     setLoading(false);
@@ -310,7 +298,7 @@ const TambahJualBekas = () => {
     const allKecamatans = await axios.post(`${tempUrl}/kecamatans`, {
       id: user._id,
       token: user.token,
-      kodeCabang: user.cabang._id,
+      kodeCabang: user.cabang._id
     });
     setKecamatans(allKecamatans.data);
     setLoading(false);
@@ -321,7 +309,7 @@ const TambahJualBekas = () => {
     const allLeasings = await axios.post(`${tempUrl}/leasings`, {
       id: user._id,
       token: user.token,
-      kodeCabang: user.cabang._id,
+      kodeCabang: user.cabang._id
     });
     setLeasings(allLeasings.data);
     setLoading(false);
@@ -344,12 +332,12 @@ const TambahJualBekas = () => {
         "-" +
         (newTglAngAkhir.getMonth() + 1).toLocaleString("en-US", {
           minimumIntegerDigits: 2,
-          useGrouping: false,
+          useGrouping: false
         }) +
         "-" +
         newTglAngAkhir.getDate().toLocaleString("en-US", {
           minimumIntegerDigits: 2,
-          useGrouping: false,
+          useGrouping: false
         });
     }
 
@@ -358,12 +346,12 @@ const TambahJualBekas = () => {
       "-" +
       (inputTglJual?.getMonth() + 1).toLocaleString("en-US", {
         minimumIntegerDigits: 2,
-        useGrouping: false,
+        useGrouping: false
       }) +
       "-" +
       inputTglJual?.getDate().toLocaleString("en-US", {
         minimumIntegerDigits: 2,
-        useGrouping: false,
+        useGrouping: false
       });
     let tglAng;
     if (inputTglAng) {
@@ -372,27 +360,18 @@ const TambahJualBekas = () => {
         "-" +
         (inputTglAng?.getMonth() + 1).toLocaleString("en-US", {
           minimumIntegerDigits: 2,
-          useGrouping: false,
+          useGrouping: false
         }) +
         "-" +
         inputTglAng?.getDate().toLocaleString("en-US", {
           minimumIntegerDigits: 2,
-          useGrouping: false,
+          useGrouping: false
         });
     }
+
     let tempDateAng = tglAng?.split("-")[2];
-
-    let tempNoJual = await axios.post(`${tempUrl}/allJualByNoJual`, {
-      noJual,
-      id: user._id,
-      token: user.token,
-      kodeCabang: user.cabang._id,
-    });
-
     if (tempDateAng > 28) {
       alert(`Tanggal Angsuran I tidak boleh lebih dari 28!`);
-    } else if (tempNoJual.data.length > 0) {
-      handleClickOpenAlert();
     } else {
       if (jenisJual === "KREDIT") {
         isFailedValidation =
@@ -407,7 +386,6 @@ const TambahJualBekas = () => {
           kodePekerjaan.length === 0 ||
           kodeKecamatan.length === 0 ||
           kodeLeasing.length === 0 ||
-          nopol.length === 0 ||
           hargaTunai.length === 0 ||
           uangMuka.length === 0 ||
           sisaPiutang.length === 0 ||
@@ -427,8 +405,12 @@ const TambahJualBekas = () => {
           kodePekerjaan.length === 0 ||
           kodeKecamatan.length === 0 ||
           kodeLeasing.length === 0 ||
-          nopol.length === 0 ||
           hargaTunai.length === 0 ||
+          uangMuka.length === 0 ||
+          sisaPiutang.length === 0 ||
+          angPerBulan.length === 0 ||
+          tenor.length === 0 ||
+          jumlahPiutang.length === 0 ||
           inputTglJual === null;
       }
 
@@ -442,37 +424,37 @@ const TambahJualBekas = () => {
             kodeMarketing,
             id: user._id,
             token: user.token,
-            kodeCabang: user.cabang._id,
+            kodeCabang: user.cabang._id
           });
           const tempSurveyor = await axios.post(`${tempUrl}/surveyorByKode`, {
             kodeSurveyor,
             id: user._id,
             token: user.token,
-            kodeCabang: user.cabang._id,
+            kodeCabang: user.cabang._id
           });
           const tempPekerjaan = await axios.post(`${tempUrl}/pekerjaanByKode`, {
             kodePekerjaan,
             id: user._id,
             token: user.token,
-            kodeCabang: user.cabang._id,
+            kodeCabang: user.cabang._id
           });
           const tempKecamatan = await axios.post(`${tempUrl}/kecamatanByKode`, {
             kodeKecamatan,
             id: user._id,
             token: user.token,
-            kodeCabang: user.cabang._id,
+            kodeCabang: user.cabang._id
           });
           const tempLeasing = await axios.post(`${tempUrl}/leasingByKode`, {
             kodeLeasing,
             id: user._id,
             token: user.token,
-            kodeCabang: user.cabang._id,
+            kodeCabang: user.cabang._id
           });
-          const tempStok = await axios.post(`${tempUrl}/daftarStoksByNopol`, {
-            nopol,
+          const tempStok = await axios.post(`${tempUrl}/daftarStoksByNorang`, {
+            noRangka,
             id: user._id,
             token: user.token,
-            kodeCabang: user.cabang._id,
+            kodeCabang: user.cabang._id
           });
           // Update Stok
           await axios.post(`${tempUrl}/updateDaftarStok/${tempStok.data._id}`, {
@@ -480,6 +462,7 @@ const TambahJualBekas = () => {
             tanggalJual: tglJual,
             id: user._id,
             token: user.token,
+            kodeCabang: user.cabang._id
           });
           if (jenisJual === "KREDIT") {
             // Save Angsuran
@@ -495,7 +478,7 @@ const TambahJualBekas = () => {
               userInput: user.username,
               kodeCabang: user.cabang._id,
               id: user._id,
-              token: user.token,
+              token: user.token
             });
             // Save Penerimaan
             let tempPenerimaan = await axios.post(`${tempUrl}/savePenerimaan`, {
@@ -508,8 +491,58 @@ const TambahJualBekas = () => {
               userInput: user.username,
               kodeCabang: user.cabang._id,
               id: user._id,
-              token: user.token,
+              token: user.token
             });
+            await axios.post(`${tempUrl}/saveJual`, {
+              noRegister,
+              namaRegister,
+              almRegister,
+              almKantor,
+              tlpRegister,
+              noKtpRegister,
+              noKKRegister,
+              namaPjmRegister,
+              noKtpPjmRegister,
+              namaRefRegister,
+              almRefRegister,
+              tlpRefRegister,
+              kodeMarketing: tempMarketing.data._id,
+              kodeSurveyor: tempSurveyor.data._id,
+              kodePekerjaan: tempPekerjaan.data._id,
+              kodeKecamatan: tempKecamatan.data._id,
+              kodeLeasing: tempLeasing.data._id,
+              noRangka,
+              noMesin,
+              nopol,
+              tipe,
+              namaWarna,
+              tahun,
+              hargaTunai,
+              uangMuka,
+              sisaPiutang,
+              angPerBulan,
+              tenor,
+              bunga,
+              jumlahPiutang,
+              noJual,
+              noKwitansi,
+              tanggalJual: tglJual,
+              jenisJual,
+              tglAng,
+              tglAngAkhir: tempTglAngAkhir,
+              angModal: sisaPiutang / tenor,
+              angBunga: angPerBulan - sisaPiutang / tenor,
+              jenisBeli: "BARU",
+              userInput: user.username,
+              kodeAngsuran: tempAngsuran.data._id,
+              tglInput: current_date,
+              jamInput: current_time,
+              userInput: user.username,
+              kodeCabang: user.cabang._id,
+              id: user._id,
+              token: user.token
+            });
+          } else {
             await axios.post(`${tempUrl}/saveJual`, {
               noRegister,
               namaRegister,
@@ -550,69 +583,19 @@ const TambahJualBekas = () => {
               userInput: user.username,
               angModal: sisaPiutang / tenor,
               angBunga: angPerBulan - sisaPiutang / tenor,
-              kodeAngsuran: tempAngsuran.data._id,
-              jenisBeli: "BEKAS",
+              jenisBeli: "BARU",
               tglInput: current_date,
               jamInput: current_time,
               userInput: user.username,
               kodeCabang: user.cabang._id,
               id: user._id,
-              token: user.token,
-            });
-          } else {
-            await axios.post(`${tempUrl}/saveJual`, {
-              noRegister,
-              namaRegister,
-              almRegister,
-              almKantor,
-              tlpRegister,
-              noKtpRegister,
-              noKKRegister,
-              namaPjmRegister,
-              noKtpPjmRegister,
-              namaRefRegister,
-              almRefRegister,
-              tlpRefRegister,
-              kodeMarketing: tempMarketing.data._id,
-              kodeSurveyor: tempSurveyor.data._id,
-              kodePekerjaan: tempPekerjaan.data._id,
-              kodeKecamatan: tempKecamatan.data._id,
-              kodeLeasing: tempLeasing.data._id,
-              noRangka,
-              noMesin,
-              nopol,
-              tipe,
-              namaWarna,
-              tahun,
-              hargaTunai,
-              uangMuka: hargaTunai,
-              sisaPiutang,
-              angPerBulan,
-              tenor,
-              bunga,
-              jumlahPiutang,
-              noJual,
-              noKwitansi,
-              tanggalJual: tglJual,
-              jenisJual,
-              tglAng,
-              tglAngAkhir: tempTglAngAkhir,
-              angModal: sisaPiutang / tenor,
-              angBunga: angPerBulan - sisaPiutang / tenor,
-              jenisBeli: "BEKAS",
-              userInput: user.username,
-              tglInput: current_date,
-              jamInput: current_time,
-              userInput: user.username,
-              kodeCabang: user.cabang._id,
-              id: user._id,
-              token: user.token,
+              token: user.token
             });
           }
           setLoading(false);
           navigate("/jual");
         } catch (error) {
-          alert(error);
+          console.log(error);
         }
       }
     }
@@ -626,27 +609,11 @@ const TambahJualBekas = () => {
     <Box sx={container}>
       <Typography color="#757575">Penjualan</Typography>
       <Typography variant="h4" sx={subTitleText}>
-        Tambah Jual Bekas
+        Tambah Jual Baru
       </Typography>
       <Typography sx={subTitleText}>
         Periode : {user.periode.namaPeriode}
       </Typography>
-      <Dialog
-        open={openAlert}
-        onClose={handleCloseAlert}
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
-      >
-        <DialogTitle id="alert-dialog-title">{`Data No Jual Sama`}</DialogTitle>
-        <DialogContent>
-          <DialogContentText id="alert-dialog-slide-description">
-            {`No Jual ${noJual} sudah ada, ganti No Jual!`}
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseAlert}>Ok</Button>
-        </DialogActions>
-      </Dialog>
       <Divider sx={dividerStyle} />
       <Paper sx={contentContainer} elevation={12}>
         {/* Data Penjualan */}
@@ -683,7 +650,7 @@ const TambahJualBekas = () => {
                 variant="outlined"
                 value={noKwitansi}
                 InputProps={{
-                  readOnly: true,
+                  readOnly: true
                 }}
                 sx={{ backgroundColor: Colors.grey400 }}
               />
@@ -731,10 +698,6 @@ const TambahJualBekas = () => {
                   if (value === "TUNAI") {
                     setInputTglAng(null);
                     setTglAngAkhir(null);
-                    setTenor(0);
-                    setAngPerBulan(0);
-                    setSisaPiutang(0);
-                    setJumlahPiutang(0);
                   }
                   setJenisJual(value);
                 }}
@@ -763,14 +726,14 @@ const TambahJualBekas = () => {
                     }
                     sx={{
                       backgroundColor: jenisJual === "TUNAI" && Colors.grey400,
-                      width: "100%",
+                      width: "100%"
                     }}
                     size="small"
                   />
                 }
               />
               <Typography sx={[labelInput, spacingTop]}>
-                Tenor (bulan)
+                Tenor
                 {tenor !== 0 &&
                   !isNaN(parseInt(tenor)) &&
                   ` : ${parseInt(tenor).toLocaleString()}`}
@@ -788,12 +751,6 @@ const TambahJualBekas = () => {
                   setTenor(e.target.value);
                   let tempJumlahPiutang = angPerBulan * e.target.value;
                   setJumlahPiutang(tempJumlahPiutang);
-                }}
-                InputProps={{
-                  readOnly: jenisJual === "TUNAI" && true,
-                }}
-                sx={{
-                  backgroundColor: jenisJual === "TUNAI" && Colors.grey400,
                 }}
               />
               <Typography sx={[labelInput, spacingTop]}>
@@ -818,10 +775,10 @@ const TambahJualBekas = () => {
                 value={tglAngAkhir}
                 onChange={(e) => setTglAngAkhir(e.target.value.toUpperCase())}
                 InputProps={{
-                  readOnly: true,
+                  readOnly: true
                 }}
                 sx={{
-                  backgroundColor: Colors.grey400,
+                  backgroundColor: Colors.grey400
                 }}
               />
             </Box>
@@ -848,7 +805,7 @@ const TambahJualBekas = () => {
                 variant="outlined"
                 value={noRegister}
                 InputProps={{
-                  readOnly: true,
+                  readOnly: true
                 }}
                 onClick={() => handleClickOpenRegister()}
                 placeholder="Pilih..."
@@ -1104,44 +1061,34 @@ const TambahJualBekas = () => {
           </Typography>
           <Box sx={showDataContainer}>
             <Box sx={showDataWrapper}>
-              <Typography sx={labelInput}>Nopol</Typography>
+              <Typography sx={labelInput}>No. Rangka</Typography>
               <Autocomplete
                 size="small"
                 disablePortal
                 id="combo-box-demo"
-                options={nopolOptions}
+                options={norangOptions}
                 renderInput={(params) => (
                   <TextField
                     size="small"
-                    error={error && nopol.length === 0 && true}
+                    error={error && noRangka.length === 0 && true}
                     helperText={
-                      error && nopol.length === 0 && "Nopol harus diisi!"
+                      error &&
+                      noRangka.length === 0 &&
+                      "No. Rangka harus diisi!"
                     }
                     {...params}
                   />
                 )}
                 onInputChange={(e, value) => {
                   if (value) {
-                    getStoksByNopol(value);
+                    getStoksByNorang(value);
                   } else {
-                    setNoRangka("");
                     setNoMesin("");
                     setTipe("");
                     setNamaWarna("");
                     setTahun("");
                   }
                 }}
-              />
-              <Typography sx={[labelInput, spacingTop]}>No. Rangka</Typography>
-              <TextField
-                size="small"
-                id="outlined-basic"
-                variant="outlined"
-                value={noRangka}
-                InputProps={{
-                  readOnly: true,
-                }}
-                sx={{ backgroundColor: Colors.grey400 }}
               />
               <Typography sx={[labelInput, spacingTop]}>No. Mesin</Typography>
               <TextField
@@ -1150,7 +1097,7 @@ const TambahJualBekas = () => {
                 variant="outlined"
                 value={noMesin}
                 InputProps={{
-                  readOnly: true,
+                  readOnly: true
                 }}
                 sx={{ backgroundColor: Colors.grey400 }}
               />
@@ -1163,7 +1110,7 @@ const TambahJualBekas = () => {
                 variant="outlined"
                 value={tipe}
                 InputProps={{
-                  readOnly: true,
+                  readOnly: true
                 }}
                 sx={{ backgroundColor: Colors.grey400 }}
               />
@@ -1174,7 +1121,7 @@ const TambahJualBekas = () => {
                 variant="outlined"
                 value={namaWarna}
                 InputProps={{
-                  readOnly: true,
+                  readOnly: true
                 }}
                 sx={{ backgroundColor: Colors.grey400 }}
               />
@@ -1187,7 +1134,7 @@ const TambahJualBekas = () => {
                 variant="outlined"
                 value={tahun}
                 InputProps={{
-                  readOnly: true,
+                  readOnly: true
                 }}
                 sx={{ backgroundColor: Colors.grey400 }}
               />
@@ -1220,10 +1167,8 @@ const TambahJualBekas = () => {
                 value={hargaTunai}
                 onChange={(e) => {
                   setHargaTunai(e.target.value);
-                  if (jenisJual === "KREDIT") {
-                    let tempSisaPiutang = e.target.value - uangMuka;
-                    setSisaPiutang(tempSisaPiutang);
-                  }
+                  let tempSisaPiutang = e.target.value - uangMuka;
+                  setSisaPiutang(tempSisaPiutang);
                 }}
               />
               <Typography sx={[labelInput, spacingTop]}>
@@ -1247,12 +1192,6 @@ const TambahJualBekas = () => {
                   let tempSisaPiutang = hargaTunai - e.target.value;
                   setSisaPiutang(tempSisaPiutang);
                 }}
-                InputProps={{
-                  readOnly: jenisJual === "TUNAI" && true,
-                }}
-                sx={{
-                  backgroundColor: jenisJual === "TUNAI" && Colors.grey400,
-                }}
               />
               <Typography sx={[labelInput, spacingTop]}>
                 Sisa Piutang
@@ -1272,7 +1211,7 @@ const TambahJualBekas = () => {
                 variant="outlined"
                 value={sisaPiutang}
                 InputProps={{
-                  readOnly: true,
+                  readOnly: true
                 }}
                 sx={{ backgroundColor: Colors.grey400 }}
               />
@@ -1301,15 +1240,9 @@ const TambahJualBekas = () => {
                   let tempJumlahPiutang = e.target.value * tenor;
                   setJumlahPiutang(tempJumlahPiutang);
                 }}
-                InputProps={{
-                  readOnly: jenisJual === "TUNAI" && true,
-                }}
-                sx={{
-                  backgroundColor: jenisJual === "TUNAI" && Colors.grey400,
-                }}
               />
               <Typography sx={[labelInput, spacingTop]}>
-                Tenor (bulan)
+                Tenor
                 {tenor !== 0 &&
                   !isNaN(parseInt(tenor)) &&
                   ` : ${parseInt(tenor).toLocaleString()}`}
@@ -1327,12 +1260,6 @@ const TambahJualBekas = () => {
                   setTenor(e.target.value);
                   let tempJumlahPiutang = angPerBulan * e.target.value;
                   setJumlahPiutang(tempJumlahPiutang);
-                }}
-                InputProps={{
-                  readOnly: jenisJual === "TUNAI" && true,
-                }}
-                sx={{
-                  backgroundColor: jenisJual === "TUNAI" && Colors.grey400,
                 }}
               />
               <Typography sx={[labelInput, spacingTop]}>
@@ -1353,7 +1280,7 @@ const TambahJualBekas = () => {
                 variant="outlined"
                 value={jumlahPiutang}
                 InputProps={{
-                  readOnly: true,
+                  readOnly: true
                 }}
                 sx={{ backgroundColor: Colors.grey400 }}
               />
@@ -1441,7 +1368,7 @@ const TambahJualBekas = () => {
                         sx={{
                           "&:last-child td, &:last-child th": { border: 0 },
                           "&:hover": { bgcolor: Colors.grey300 },
-                          cursor: "pointer",
+                          cursor: "pointer"
                         }}
                         onClick={() => {
                           setNoRegister(user.noRegister);
@@ -1476,18 +1403,18 @@ const TambahJualBekas = () => {
   );
 };
 
-export default TambahJualBekas;
+export default TambahJualBaru;
 
 const container = {
-  p: 4,
+  p: 4
 };
 
 const subTitleText = {
-  fontWeight: "900",
+  fontWeight: "900"
 };
 
 const dividerStyle = {
-  mt: 2,
+  mt: 2
 };
 
 const showDataContainer = {
@@ -1495,8 +1422,8 @@ const showDataContainer = {
   display: "flex",
   flexDirection: {
     xs: "column",
-    sm: "row",
-  },
+    sm: "row"
+  }
 };
 
 const showDataWrapper = {
@@ -1504,47 +1431,47 @@ const showDataWrapper = {
   flex: 1,
   flexDirection: "column",
   maxWidth: {
-    md: "40vw",
-  },
+    md: "40vw"
+  }
 };
 
 const spacingTop = {
-  mt: 4,
+  mt: 4
 };
 
 const alertBox = {
-  width: "100%",
+  width: "100%"
 };
 
 const labelInput = {
   fontWeight: "600",
-  marginLeft: 1,
+  marginLeft: 1
 };
 
 const contentContainer = {
   p: {
     sm: 0,
-    md: 3,
+    md: 3
   },
   pt: {
     sm: 0,
-    md: 1,
+    md: 1
   },
   mt: {
     sm: 0,
-    md: 2,
+    md: 2
   },
-  backgroundColor: Colors.grey100,
+  backgroundColor: Colors.grey100
 };
 
 const secondWrapper = {
   marginLeft: {
-    sm: 4,
+    sm: 4
   },
   marginTop: {
     sm: 0,
-    xs: 4,
-  },
+    xs: 4
+  }
 };
 
 const mainContainer = {
@@ -1552,27 +1479,27 @@ const mainContainer = {
   borderRadius: "20px",
   margin: {
     sm: 0,
-    md: 4,
+    md: 4
   },
   marginTop: {
     xs: 4,
-    md: 0,
-  },
+    md: 0
+  }
 };
 
 const dialogContainer = {
   display: "flex",
   flexDirection: "column",
   padding: 4,
-  width: "800px",
+  width: "800px"
 };
 
 const dialogWrapper = {
   width: "100%",
-  marginTop: 2,
+  marginTop: 2
 };
 
 const titleStyle = {
   textAlign: "center",
-  fontWeight: "600",
+  fontWeight: "600"
 };

@@ -1,16 +1,17 @@
 import React, { useState, useEffect, useContext } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
-import { AuthContext } from "../../../contexts/AuthContext";
-import { tempUrl, useStateContext } from "../../../contexts/ContextProvider";
-import { ShowTableSupplier } from "../../../components/ShowTable";
-import { FetchErrorHandling } from "../../../components/FetchErrorHandling";
+import { AuthContext } from "../../../../contexts/AuthContext";
+import { tempUrl } from "../../../../contexts/ContextProvider";
+import { useStateContext } from "../../../../contexts/ContextProvider";
+import { ShowTableTipe } from "../../../../components/ShowTable";
+import { FetchErrorHandling } from "../../../../components/FetchErrorHandling";
 import {
   SearchBar,
   Loader,
   usePagination,
   ButtonModifier
-} from "../../../components";
+} from "../../../../components";
 import {
   Box,
   TextField,
@@ -18,7 +19,12 @@ import {
   Divider,
   Pagination,
   Button,
-  ButtonGroup
+  ButtonGroup,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions
 } from "@mui/material";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
@@ -26,34 +32,41 @@ import * as XLSX from "xlsx";
 import DownloadIcon from "@mui/icons-material/Download";
 import PrintIcon from "@mui/icons-material/Print";
 
-const TampilSupplier = () => {
+const TampilTipe = () => {
   const { user, setting } = useContext(AuthContext);
   const location = useLocation();
   const id = location.pathname.split("/")[2];
   const { screenSize } = useStateContext();
 
   const [isFetchError, setIsFetchError] = useState(false);
-  const [kodeSupplier, setKodeSupplier] = useState("");
-  const [namaSupplier, setNamaSupplier] = useState("");
-  const [alamatSupplier, setAlamatSupplier] = useState("");
-  const [kotaSupplier, setKotaSupplier] = useState("");
-  const [teleponSupplier, setTeleponSupplier] = useState("");
-  const [picSupplier, setPicSupplier] = useState("");
-  const [npwpSupplier, setNpwpSupplier] = useState("");
+  const [kodeTipe, setKodeTipe] = useState("");
+  const [namaTipe, setNamaTipe] = useState("");
+  const [noRangka, setNoRangka] = useState("");
+  const [noMesin, setNoMesin] = useState("");
+  const [isi, setIsi] = useState("");
+  const [merk, setMerk] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
-  const [suppliersData, setSuppliersData] = useState([]);
-  const [suppliersForDoc, setSuppliersForDoc] = useState([]);
+  const [tipesData, setTipesData] = useState([]);
+  const [tipesForDoc, setTipesForDoc] = useState([]);
   const navigate = useNavigate();
-  let isSupplierExist = kodeSupplier.length !== 0;
+  let isTipesExist = kodeTipe.length !== 0;
+  const [open, setOpen] = useState(false);
+
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
 
   const columns = [
-    { title: "Kode", field: "kodeSupplier" },
-    { title: "Nama Supplier", field: "namaSupplier" },
-    { title: "Alamat", field: "alamatSupplier" },
-    { title: "Kota", field: "kotaSupplier" },
-    { title: "Telepon", field: "teleponSupplier" },
-    { title: "PIC", field: "picSupplier" },
-    { title: "NPWP", field: "npwpSupplier" }
+    { title: "Kode", field: "kodeTipe" },
+    { title: "Tipe / Merk", field: "namaTipe" },
+    { title: "No. Rangka", field: "noRangka" },
+    { title: "no. Mesin", field: "noMesin" },
+    { title: "Isi", field: "isi" },
+    { title: "Merk", field: "merk" }
   ];
 
   const [loading, setLoading] = useState(false);
@@ -63,17 +76,16 @@ const TampilSupplier = () => {
   // Get current posts
   const indexOfLastPost = page * PER_PAGE;
   const indexOfFirstPost = indexOfLastPost - PER_PAGE;
-  const tempPosts = suppliersData.filter((val) => {
+  const tempPosts = tipesData.filter((val) => {
     if (searchTerm === "") {
       return val;
     } else if (
-      val.kodeSupplier.toUpperCase().includes(searchTerm.toUpperCase()) ||
-      val.namaSupplier.toUpperCase().includes(searchTerm.toUpperCase()) ||
-      val.alamatSupplier.toUpperCase().includes(searchTerm.toUpperCase()) ||
-      val.kotaSupplier.toUpperCase().includes(searchTerm.toUpperCase()) ||
-      val.teleponSupplier.toUpperCase().includes(searchTerm.toUpperCase()) ||
-      val.picSupplier.toUpperCase().includes(searchTerm.toUpperCase()) ||
-      val.npwpSupplier.toUpperCase().includes(searchTerm.toUpperCase())
+      val.kodeTipe.toUpperCase().includes(searchTerm.toUpperCase()) ||
+      val.namaTipe.toUpperCase().includes(searchTerm.toUpperCase()) ||
+      val.noRangka.toUpperCase().includes(searchTerm.toUpperCase()) ||
+      val.noMesin.toUpperCase().includes(searchTerm.toUpperCase()) ||
+      val.isi.toUpperCase().includes(searchTerm.toUpperCase()) ||
+      val.merk.toUpperCase().includes(searchTerm.toUpperCase())
     ) {
       return val;
     }
@@ -81,7 +93,7 @@ const TampilSupplier = () => {
   const currentPosts = tempPosts.slice(indexOfFirstPost, indexOfLastPost);
 
   const count = Math.ceil(tempPosts.length / PER_PAGE);
-  const _DATA = usePagination(suppliersData, PER_PAGE);
+  const _DATA = usePagination(tipesData, PER_PAGE);
 
   const handleChange = (e, p) => {
     setPage(p);
@@ -89,76 +101,74 @@ const TampilSupplier = () => {
   };
 
   useEffect(() => {
-    getSuppliersForDoc();
-    getSuppliersData();
-    id && getSupplierById();
+    getTipesData();
+    getTipesForDoc();
+    id && getTipeById();
   }, [id]);
 
-  const getSuppliersData = async () => {
+  const getTipesData = async () => {
     setLoading(true);
     try {
-      const allSuppliers = await axios.post(`${tempUrl}/suppliers`, {
+      const allTipes = await axios.post(`${tempUrl}/tipes`, {
         id: user._id,
         token: user.token
       });
-      setSuppliersData(allSuppliers.data);
+      setTipesData(allTipes.data);
     } catch (err) {
       setIsFetchError(true);
     }
     setLoading(false);
   };
 
-  const getSuppliersForDoc = async () => {
+  const getTipesForDoc = async () => {
     setLoading(true);
-    try {
-      const allSuppliersForDoc = await axios.post(
-        `${tempUrl}/suppliersForDoc`,
-        {
-          id: user._id,
-          token: user.token
-        }
-      );
-      setSuppliersForDoc(allSuppliersForDoc.data);
-    } catch (err) {
-      setIsFetchError(true);
-    }
+    const allTipesForDoc = await axios.post(`${tempUrl}/tipesForDoc`, {
+      id: user._id,
+      token: user.token
+    });
+    setTipesForDoc(allTipesForDoc.data);
     setLoading(false);
   };
 
-  const getSupplierById = async () => {
+  const getTipeById = async () => {
     if (id) {
-      const pickedSupplier = await axios.post(`${tempUrl}/suppliers/${id}`, {
+      const pickedTipe = await axios.post(`${tempUrl}/tipes/${id}`, {
         id: user._id,
         token: user.token
       });
-      setKodeSupplier(pickedSupplier.data.kodeSupplier);
-      setNamaSupplier(pickedSupplier.data.namaSupplier);
-      setAlamatSupplier(pickedSupplier.data.alamatSupplier);
-      setKotaSupplier(pickedSupplier.data.kotaSupplier);
-      setTeleponSupplier(pickedSupplier.data.teleponSupplier);
-      setPicSupplier(pickedSupplier.data.picSupplier);
-      setNpwpSupplier(pickedSupplier.data.npwpSupplier);
+      setKodeTipe(pickedTipe.data.kodeTipe);
+      setNamaTipe(pickedTipe.data.namaTipe);
+      setNoRangka(pickedTipe.data.noRangka);
+      setNoMesin(pickedTipe.data.noMesin);
+      setIsi(pickedTipe.data.isi);
+      setMerk(pickedTipe.data.merk);
     }
   };
 
-  const deleteSupplier = async (id) => {
-    try {
+  const deleteTipe = async (id) => {
+    const findDaftarStoksTipe = await axios.post(`${tempUrl}/daftarStoksTipe`, {
+      kodeTipe,
+      id: user._id,
+      token: user.token
+    });
+    if (findDaftarStoksTipe.data.length > 0) {
+      // There's Record -> Forbid Delete
+      handleClickOpen();
+    } else {
+      // No Record Found -> Delete
       setLoading(true);
-      await axios.post(`${tempUrl}/deleteSupplier/${id}`, {
+      await axios.post(`${tempUrl}/deleteTipe/${id}`, {
         id: user._id,
         token: user.token
       });
-      setKodeSupplier("");
-      setNamaSupplier("");
-      setAlamatSupplier("");
-      setKotaSupplier("");
-      setTeleponSupplier("");
-      setPicSupplier("");
-      setNpwpSupplier("");
+      setKodeTipe("");
+      setNamaTipe("");
+      setNoRangka("");
+      setNoMesin("");
+      setIsi("");
+      setMerk("");
       setLoading(false);
-      navigate("/supplier");
-    } catch (error) {
-      console.log(error);
+      navigate("/tipe");
     }
   };
 
@@ -173,7 +183,7 @@ const TampilSupplier = () => {
     doc.text(`${setting.namaPerusahaan} - ${setting.kotaPerusahaan}`, 15, 10);
     doc.text(`${setting.lokasiPerusahaan}`, 15, 15);
     doc.setFontSize(16);
-    doc.text(`Daftar Supplier`, 90, 30);
+    doc.text(`Daftar Tipe`, 90, 30);
     doc.setFontSize(10);
     doc.text(
       `Dicetak Oleh: ${user.username} | Tanggal : ${current_date} | Jam : ${current_time}`,
@@ -184,25 +194,25 @@ const TampilSupplier = () => {
     doc.autoTable({
       startY: doc.pageCount > 1 ? doc.autoTableEndPosY() + 20 : 45,
       columns: columns.map((col) => ({ ...col, dataKey: col.field })),
-      body: suppliersForDoc,
+      body: tipesData,
       headStyles: {
         fillColor: [117, 117, 117],
         color: [0, 0, 0]
       }
     });
-    doc.save(`daftarSupplier.pdf`);
+    doc.save(`daftarTipe.pdf`);
   };
 
   const downloadExcel = () => {
-    const workSheet = XLSX.utils.json_to_sheet(suppliersForDoc);
+    const workSheet = XLSX.utils.json_to_sheet(tipesForDoc);
     const workBook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workBook, workSheet, `Supplier`);
+    XLSX.utils.book_append_sheet(workBook, workSheet, `Tipe`);
     // Buffer
     let buf = XLSX.write(workBook, { bookType: "xlsx", type: "buffer" });
     // Binary String
     XLSX.write(workBook, { bookType: "xlsx", type: "binary" });
     // Download
-    XLSX.writeFile(workBook, `daftarSupplier.xlsx`);
+    XLSX.writeFile(workBook, `daftarTipe.xlsx`);
   };
 
   if (loading) {
@@ -217,8 +227,24 @@ const TampilSupplier = () => {
     <Box sx={container}>
       <Typography color="#757575">Master</Typography>
       <Typography variant="h4" sx={subTitleText}>
-        Supplier
+        Tipe/Merk
       </Typography>
+      <Dialog
+        open={open}
+        onClose={handleClose}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">{`Tidak bisa dihapus karena sudah ada data!`}</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-slide-description">
+            {`Kode Tipe data: ${kodeTipe}`}
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose}>Cancel</Button>
+        </DialogActions>
+      </Dialog>
       <Box sx={downloadButtons}>
         <ButtonGroup variant="outlined" color="secondary">
           <Button startIcon={<PrintIcon />} onClick={() => downloadPdf()}>
@@ -232,15 +258,15 @@ const TampilSupplier = () => {
       <Box sx={buttonModifierContainer}>
         <ButtonModifier
           id={id}
-          kode={kodeSupplier}
-          addLink={`/supplier/tambahSupplier`}
-          editLink={`/supplier/${id}/edit`}
-          deleteUser={deleteSupplier}
-          nameUser={kodeSupplier}
+          kode={kodeTipe}
+          addLink={`/tipe/tambahTipe`}
+          editLink={`/tipe/${id}/edit`}
+          deleteUser={deleteTipe}
+          nameUser={kodeTipe}
         />
       </Box>
       <Divider sx={dividerStyle} />
-      {isSupplierExist && (
+      {isTipesExist && (
         <>
           <Box sx={showDataContainer}>
             <Box sx={showDataWrapper}>
@@ -252,11 +278,9 @@ const TampilSupplier = () => {
                 InputProps={{
                   readOnly: true
                 }}
-                value={kodeSupplier}
+                value={kodeTipe}
               />
-              <Typography sx={[labelInput, spacingTop]}>
-                Nama Supplier
-              </Typography>
+              <Typography sx={[labelInput, spacingTop]}>Nama Tipe</Typography>
               <TextField
                 size="small"
                 id="outlined-basic"
@@ -264,9 +288,9 @@ const TampilSupplier = () => {
                 InputProps={{
                   readOnly: true
                 }}
-                value={namaSupplier}
+                value={namaTipe}
               />
-              <Typography sx={[labelInput, spacingTop]}>Alamat</Typography>
+              <Typography sx={[labelInput, spacingTop]}>No. Rangka</Typography>
               <TextField
                 size="small"
                 id="outlined-basic"
@@ -274,21 +298,11 @@ const TampilSupplier = () => {
                 InputProps={{
                   readOnly: true
                 }}
-                value={alamatSupplier}
-              />
-              <Typography sx={[labelInput, spacingTop]}>Kota</Typography>
-              <TextField
-                size="small"
-                id="outlined-basic"
-                variant="filled"
-                InputProps={{
-                  readOnly: true
-                }}
-                value={kotaSupplier}
+                value={noRangka}
               />
             </Box>
             <Box sx={[showDataWrapper, secondWrapper]}>
-              <Typography sx={labelInput}>Telepon</Typography>
+              <Typography sx={labelInput}>No. Mesin</Typography>
               <TextField
                 size="small"
                 id="outlined-basic"
@@ -296,9 +310,9 @@ const TampilSupplier = () => {
                 InputProps={{
                   readOnly: true
                 }}
-                value={teleponSupplier}
+                value={noMesin}
               />
-              <Typography sx={[labelInput, spacingTop]}>PIC</Typography>
+              <Typography sx={[labelInput, spacingTop]}>Isi</Typography>
               <TextField
                 size="small"
                 id="outlined-basic"
@@ -306,9 +320,9 @@ const TampilSupplier = () => {
                 InputProps={{
                   readOnly: true
                 }}
-                value={picSupplier}
+                value={isi}
               />
-              <Typography sx={[labelInput, spacingTop]}>NPWP</Typography>
+              <Typography sx={[labelInput, spacingTop]}>Merk</Typography>
               <TextField
                 size="small"
                 id="outlined-basic"
@@ -316,7 +330,7 @@ const TampilSupplier = () => {
                 InputProps={{
                   readOnly: true
                 }}
-                value={npwpSupplier}
+                value={merk}
               />
             </Box>
           </Box>
@@ -327,10 +341,7 @@ const TampilSupplier = () => {
         <SearchBar setSearchTerm={setSearchTerm} />
       </Box>
       <Box sx={tableContainer}>
-        <ShowTableSupplier
-          currentPosts={currentPosts}
-          searchTerm={searchTerm}
-        />
+        <ShowTableTipe currentPosts={currentPosts} searchTerm={searchTerm} />
       </Box>
       <Box sx={tableContainer}>
         <Pagination
@@ -345,7 +356,7 @@ const TampilSupplier = () => {
   );
 };
 
-export default TampilSupplier;
+export default TampilTipe;
 
 const container = {
   p: 4

@@ -51,6 +51,7 @@ const TampilRegister = () => {
   const [namaRefRegister, setNamaRefRegister] = useState("");
   const [almRefRegister, setAlmRefRegister] = useState("");
   const [tlpRefRegister, setTlpRefRegister] = useState("");
+  const [kecamatanId, setKecamatanId] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [registersData, setRegistersData] = useState([]);
   const [registersForDoc, setRegistersForDoc] = useState([]);
@@ -148,11 +149,18 @@ const TampilRegister = () => {
       setTlpPjmRegister(pickedRegister.data.tlpPjmRegister);
       setHubunganRegister(pickedRegister.data.hubunganRegister);
       setNoKtpPjmRegister(pickedRegister.data.noKtpPjmRegister);
-      setPkjPjmRegister(pickedRegister.data.pkjPjmRegister);
-      setPkjRegister(pickedRegister.data.pkjRegister);
+      setPkjPjmRegister(
+        `${pickedRegister.data.pekerjaanPenjaminId.kodePekerjaan} - ${pickedRegister.data.pekerjaanPenjaminId.namaPekerjaan}`
+      );
+      setPkjRegister(
+        `${pickedRegister.data.pekerjaanId.kodePekerjaan} - ${pickedRegister.data.pekerjaanId.namaPekerjaan}`
+      );
       setNamaRefRegister(pickedRegister.data.namaRefRegister);
       setAlmRefRegister(pickedRegister.data.almRefRegister);
       setTlpRefRegister(pickedRegister.data.tlpRefRegister);
+      setKecamatanId(
+        `${pickedRegister.data.kecamatanId.kodeKecamatan} - ${pickedRegister.data.kecamatanId.namaKecamatan}`
+      );
     }
   };
 
@@ -376,7 +384,19 @@ const TampilRegister = () => {
               />
             </Box>
             <Box sx={[showDataWrapper, secondWrapper]}>
-              <Typography sx={labelInput}>Nama Penjamin</Typography>
+              <Typography sx={labelInput}>Kecamatan</Typography>
+              <TextField
+                size="small"
+                id="outlined-basic"
+                variant="filled"
+                InputProps={{
+                  readOnly: true
+                }}
+                value={kecamatanId}
+              />
+              <Typography sx={[labelInput, spacingTop]}>
+                Nama Penjamin
+              </Typography>
               <TextField
                 size="small"
                 id="outlined-basic"

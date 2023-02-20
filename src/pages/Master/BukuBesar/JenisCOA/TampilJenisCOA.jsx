@@ -1,16 +1,16 @@
 import React, { useState, useEffect, useContext } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
-import { AuthContext } from "../../../contexts/AuthContext";
-import { tempUrl, useStateContext } from "../../../contexts/ContextProvider";
-import { ShowTableMarketing } from "../../../components/ShowTable";
-import { FetchErrorHandling } from "../../../components/FetchErrorHandling";
+import { AuthContext } from "../../../../contexts/AuthContext";
+import { tempUrl, useStateContext } from "../../../../contexts/ContextProvider";
+import { ShowTableJenisCOA } from "../../../../components/ShowTable";
+import { FetchErrorHandling } from "../../../../components/FetchErrorHandling";
 import {
   SearchBar,
   Loader,
   usePagination,
   ButtonModifier
-} from "../../../components";
+} from "../../../../components";
 import {
   Box,
   TextField,
@@ -18,7 +18,12 @@ import {
   Divider,
   Pagination,
   Button,
-  ButtonGroup
+  ButtonGroup,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions
 } from "@mui/material";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
@@ -26,26 +31,34 @@ import * as XLSX from "xlsx";
 import DownloadIcon from "@mui/icons-material/Download";
 import PrintIcon from "@mui/icons-material/Print";
 
-const TampilMarketing = () => {
-  const { user, setting, dispatch } = useContext(AuthContext);
+const TampilJenisCOA = () => {
+  const { user, setting } = useContext(AuthContext);
   const location = useLocation();
   const id = location.pathname.split("/")[2];
   const { screenSize } = useStateContext();
 
   const [isFetchError, setIsFetchError] = useState(false);
-  const [kodeMarketing, setKodeMarketing] = useState("");
-  const [namaMarketing, setNamaMarketing] = useState("");
-  const [teleponMarketing, setTeleponMarketing] = useState("");
+  const [kodeJenisCOA, setKodeJenisCOA] = useState("");
+  const [namaJenisCOA, setNamaJenisCOA] = useState("");
+
   const [searchTerm, setSearchTerm] = useState("");
-  const [marketingsData, setMarketingsData] = useState([]);
-  const [marketingsForDoc, setMarketingsForDoc] = useState([]);
+  const [jenisCOAsData, setJenisCOAsData] = useState([]);
+  const [jenisCOAsDataForDoc, setJenisCOAsDataForDoc] = useState([]);
   const navigate = useNavigate();
-  let isMarketingExist = kodeMarketing.length !== 0;
+  let isJenisCOAExist = kodeJenisCOA.length !== 0;
+  const [open, setOpen] = useState(false);
+
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
 
   const columns = [
-    { title: "Kode", field: "kodeMarketing" },
-    { title: "Nama Marketing", field: "namaMarketing" },
-    { title: "Telepon Marketing", field: "teleponMarketing" }
+    { title: "Kode", field: "kodeJenisCOA" },
+    { title: "Nama Jenis COA", field: "namaJenisCOA" }
   ];
 
   const [loading, setLoading] = useState(false);
@@ -55,13 +68,12 @@ const TampilMarketing = () => {
   // Get current posts
   const indexOfLastPost = page * PER_PAGE;
   const indexOfFirstPost = indexOfLastPost - PER_PAGE;
-  const tempPosts = marketingsData.filter((val) => {
+  const tempPosts = jenisCOAsData.filter((val) => {
     if (searchTerm === "") {
       return val;
     } else if (
-      val.kodeMarketing.toUpperCase().includes(searchTerm.toUpperCase()) ||
-      val.namaMarketing.toUpperCase().includes(searchTerm.toUpperCase()) ||
-      val.teleponMarketing.toUpperCase().includes(searchTerm.toUpperCase())
+      val.kodeJenisCOA.toUpperCase().includes(searchTerm.toUpperCase()) ||
+      val.namaJenisCOA.toUpperCase().includes(searchTerm.toUpperCase())
     ) {
       return val;
     }
@@ -69,7 +81,7 @@ const TampilMarketing = () => {
   const currentPosts = tempPosts.slice(indexOfFirstPost, indexOfLastPost);
 
   const count = Math.ceil(tempPosts.length / PER_PAGE);
-  const _DATA = usePagination(marketingsData, PER_PAGE);
+  const _DATA = usePagination(jenisCOAsData, PER_PAGE);
 
   const handleChange = (e, p) => {
     setPage(p);
@@ -77,68 +89,80 @@ const TampilMarketing = () => {
   };
 
   useEffect(() => {
-    getMarketingsForDoc();
-    getMarketingsData();
-    id && getMarketingById();
+    getJenisCOAsForDoc();
+    getJenisCOAsData();
+    id && getJenisCOAById();
   }, [id]);
 
-  const getMarketingsData = async () => {
+  const getJenisCOAsData = async () => {
     setLoading(true);
     try {
-      const allMarketings = await axios.post(`${tempUrl}/marketings`, {
+      const allJenisCOAs = await axios.post(`${tempUrl}/jenisCOAs`, {
         id: user._id,
         token: user.token
       });
-      setMarketingsData(allMarketings.data);
+      setJenisCOAsData(allJenisCOAs.data);
     } catch (err) {
       setIsFetchError(true);
     }
     setLoading(false);
   };
 
-  const getMarketingsForDoc = async () => {
+  const getJenisCOAsForDoc = async () => {
     setLoading(true);
     try {
-      const allMarketingsForDoc = await axios.post(
-        `${tempUrl}/marketingsForDoc`,
+      const allJenisCOAsForDoc = await axios.post(
+        `${tempUrl}/jenisCOAsForDoc`,
         {
           id: user._id,
           token: user.token
         }
       );
-      setMarketingsForDoc(allMarketingsForDoc.data);
+      setJenisCOAsDataForDoc(allJenisCOAsForDoc.data);
     } catch (err) {
       setIsFetchError(true);
     }
     setLoading(false);
   };
 
-  const getMarketingById = async () => {
+  const getJenisCOAById = async () => {
     if (id) {
-      const pickedMarketing = await axios.post(`${tempUrl}/marketings/${id}`, {
+      const pickedJenisCOA = await axios.post(`${tempUrl}/jenisCOAs/${id}`, {
         id: user._id,
         token: user.token
       });
-      setKodeMarketing(pickedMarketing.data.kodeMarketing);
-      setNamaMarketing(pickedMarketing.data.namaMarketing);
-      setTeleponMarketing(pickedMarketing.data.teleponMarketing);
+      setKodeJenisCOA(pickedJenisCOA.data.kodeJenisCOA);
+      setNamaJenisCOA(pickedJenisCOA.data.namaJenisCOA);
     }
   };
 
-  const deleteMarketing = async (id) => {
-    try {
-      setLoading(true);
-      await axios.post(`${tempUrl}/deleteMarketing/${id}`, {
+  const deleteJenisCOA = async (id) => {
+    const findGroupCoaKodeJenis = await axios.post(
+      `${tempUrl}/groupCOAsKodeJenis`,
+      {
+        kodeJenisCOA,
         id: user._id,
         token: user.token
-      });
-      setKodeMarketing("");
-      setNamaMarketing("");
-      setTeleponMarketing("");
-      setLoading(false);
-      navigate("/marketing");
-    } catch (error) {
-      console.log(error);
+      }
+    );
+    if (findGroupCoaKodeJenis.data.length > 0) {
+      // There's Record -> Forbid Delete
+      handleClickOpen();
+    } else {
+      // No Record Found -> Delete
+      try {
+        setLoading(true);
+        await axios.post(`${tempUrl}/deleteJenisCOA/${id}`, {
+          id: user._id,
+          token: user.token
+        });
+        setKodeJenisCOA("");
+        setNamaJenisCOA("");
+        setLoading(false);
+        navigate("/jenisCOA");
+      } catch (error) {
+        console.log(error);
+      }
     }
   };
 
@@ -153,7 +177,7 @@ const TampilMarketing = () => {
     doc.text(`${setting.namaPerusahaan} - ${setting.kotaPerusahaan}`, 15, 10);
     doc.text(`${setting.lokasiPerusahaan}`, 15, 15);
     doc.setFontSize(16);
-    doc.text(`Daftar Marketing`, 90, 30);
+    doc.text(`Daftar Jenis COA`, 90, 30);
     doc.setFontSize(10);
     doc.text(
       `Dicetak Oleh: ${user.username} | Tanggal : ${current_date} | Jam : ${current_time}`,
@@ -164,25 +188,25 @@ const TampilMarketing = () => {
     doc.autoTable({
       startY: doc.pageCount > 1 ? doc.autoTableEndPosY() + 20 : 45,
       columns: columns.map((col) => ({ ...col, dataKey: col.field })),
-      body: marketingsForDoc,
+      body: jenisCOAsDataForDoc,
       headStyles: {
         fillColor: [117, 117, 117],
         color: [0, 0, 0]
       }
     });
-    doc.save(`daftarMarketing.pdf`);
+    doc.save(`daftarJenisCOA.pdf`);
   };
 
   const downloadExcel = () => {
-    const workSheet = XLSX.utils.json_to_sheet(marketingsForDoc);
+    const workSheet = XLSX.utils.json_to_sheet(jenisCOAsDataForDoc);
     const workBook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workBook, workSheet, `Marketing`);
+    XLSX.utils.book_append_sheet(workBook, workSheet, `Jenis COA`);
     // Buffer
     let buf = XLSX.write(workBook, { bookType: "xlsx", type: "buffer" });
     // Binary String
     XLSX.write(workBook, { bookType: "xlsx", type: "binary" });
     // Download
-    XLSX.writeFile(workBook, `daftarMarketing.xlsx`);
+    XLSX.writeFile(workBook, `daftarJenisCOA.xlsx`);
   };
 
   if (loading) {
@@ -197,8 +221,24 @@ const TampilMarketing = () => {
     <Box sx={container}>
       <Typography color="#757575">Master</Typography>
       <Typography variant="h4" sx={subTitleText}>
-        Marketing
+        Jenis COA
       </Typography>
+      <Dialog
+        open={open}
+        onClose={handleClose}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">{`Tidak bisa dihapus karena sudah ada data!`}</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-slide-description">
+            {`Nama Jenis COA data: ${namaJenisCOA}`}
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose}>Cancel</Button>
+        </DialogActions>
+      </Dialog>
       <Box sx={downloadButtons}>
         <ButtonGroup variant="outlined" color="secondary">
           <Button startIcon={<PrintIcon />} onClick={() => downloadPdf()}>
@@ -212,15 +252,15 @@ const TampilMarketing = () => {
       <Box sx={buttonModifierContainer}>
         <ButtonModifier
           id={id}
-          kode={kodeMarketing}
-          addLink={`/marketing/tambahMarketing`}
-          editLink={`/marketing/${id}/edit`}
-          deleteUser={deleteMarketing}
-          nameUser={kodeMarketing}
+          kode={kodeJenisCOA}
+          addLink={`/jenisCOA/tambahJenisCOA`}
+          editLink={`/jenisCOA/${id}/edit`}
+          deleteUser={deleteJenisCOA}
+          nameUser={kodeJenisCOA}
         />
       </Box>
       <Divider sx={dividerStyle} />
-      {isMarketingExist && (
+      {isJenisCOAExist && (
         <>
           <Box sx={showDataContainer}>
             <Box sx={showDataWrapper}>
@@ -232,10 +272,10 @@ const TampilMarketing = () => {
                 InputProps={{
                   readOnly: true
                 }}
-                value={kodeMarketing}
+                value={kodeJenisCOA}
               />
               <Typography sx={[labelInput, spacingTop]}>
-                Nama Marketing
+                Nama Group COA
               </Typography>
               <TextField
                 size="small"
@@ -244,19 +284,7 @@ const TampilMarketing = () => {
                 InputProps={{
                   readOnly: true
                 }}
-                value={namaMarketing}
-              />
-            </Box>
-            <Box sx={[showDataWrapper, secondWrapper]}>
-              <Typography sx={labelInput}>Telepon</Typography>
-              <TextField
-                size="small"
-                id="outlined-basic"
-                variant="filled"
-                InputProps={{
-                  readOnly: true
-                }}
-                value={teleponMarketing}
+                value={namaJenisCOA}
               />
             </Box>
           </Box>
@@ -267,7 +295,7 @@ const TampilMarketing = () => {
         <SearchBar setSearchTerm={setSearchTerm} />
       </Box>
       <Box sx={tableContainer}>
-        <ShowTableMarketing
+        <ShowTableJenisCOA
           currentPosts={currentPosts}
           searchTerm={searchTerm}
         />
@@ -285,7 +313,7 @@ const TampilMarketing = () => {
   );
 };
 
-export default TampilMarketing;
+export default TampilJenisCOA;
 
 const container = {
   p: 4
@@ -309,10 +337,7 @@ const dividerStyle = {
 const showDataContainer = {
   mt: 4,
   display: "flex",
-  flexDirection: {
-    xs: "column",
-    sm: "row"
-  }
+  flexWrap: "wrap"
 };
 
 const showDataWrapper = {
@@ -322,6 +347,11 @@ const showDataWrapper = {
   maxWidth: {
     md: "40vw"
   }
+};
+
+const textFieldStyle = {
+  display: "flex",
+  mt: 4
 };
 
 const searchBarContainer = {
@@ -343,16 +373,6 @@ const labelInput = {
 
 const spacingTop = {
   mt: 4
-};
-
-const secondWrapper = {
-  marginLeft: {
-    sm: 4
-  },
-  marginTop: {
-    sm: 0,
-    xs: 4
-  }
 };
 
 const downloadButtons = {

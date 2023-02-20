@@ -13,7 +13,8 @@ import {
   Divider,
   Snackbar,
   Alert,
-  Paper
+  Paper,
+  Autocomplete
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 
@@ -39,6 +40,14 @@ const UbahCOA = () => {
     }
     setOpen(false);
   };
+
+  const jenisSaldoOptions = [{ label: "DEBET" }, { label: "KREDIT" }];
+
+  const kasBankOptions = [
+    { label: "KAS" },
+    { label: "BANK" },
+    { label: "NON KAS BANK" }
+  ];
 
   useEffect(() => {
     getCOAById();
@@ -68,7 +77,8 @@ const UbahCOA = () => {
     var current_time =
       date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds();
 
-    let isFailedValidation = namaCOA.length === 0;
+    let isFailedValidation =
+      namaCOA.length === 0 || jenisSaldo.length === 0 || kasBank.length === 0;
     if (isFailedValidation) {
       setError(true);
       setOpen(!open);
@@ -77,6 +87,8 @@ const UbahCOA = () => {
         setLoading(true);
         await axios.post(`${tempUrl}/updateCOA/${id}`, {
           namaCOA,
+          jenisSaldo,
+          kasBank,
           tglUpdate: current_date,
           jamUpdate: current_time,
           userUpdate: user.username,
@@ -169,26 +181,44 @@ const UbahCOA = () => {
               onChange={(e) => setNamaCOA(e.target.value.toUpperCase())}
             />
             <Typography sx={[labelInput, spacingTop]}>Jenis Saldo</Typography>
-            <TextField
+            <Autocomplete
               size="small"
-              id="outlined-basic"
-              variant="outlined"
-              value={jenisSaldo}
-              InputProps={{
-                readOnly: true
-              }}
-              sx={{ backgroundColor: Colors.grey400 }}
+              disablePortal
+              id="combo-box-demo"
+              options={jenisSaldoOptions}
+              renderInput={(params) => (
+                <TextField
+                  size="small"
+                  error={error && jenisSaldo.length === 0 && true}
+                  helperText={
+                    error &&
+                    jenisSaldo.length === 0 &&
+                    "Jenis Saldo harus diisi!"
+                  }
+                  {...params}
+                />
+              )}
+              value={{ label: jenisSaldo }}
+              onInputChange={(e, value) => setJenisSaldo(value)}
             />
             <Typography sx={[labelInput, spacingTop]}>Kas/Bank</Typography>
-            <TextField
+            <Autocomplete
               size="small"
-              id="outlined-basic"
-              variant="outlined"
-              value={kasBank}
-              InputProps={{
-                readOnly: true
-              }}
-              sx={{ backgroundColor: Colors.grey400 }}
+              disablePortal
+              id="combo-box-demo"
+              options={kasBankOptions}
+              renderInput={(params) => (
+                <TextField
+                  size="small"
+                  error={error && kasBank.length === 0 && true}
+                  helperText={
+                    error && kasBank.length === 0 && "Kas/Bank harus diisi!"
+                  }
+                  {...params}
+                />
+              )}
+              value={{ label: kasBank }}
+              onInputChange={(e, value) => setKasBank(value)}
             />
           </Box>
         </Box>

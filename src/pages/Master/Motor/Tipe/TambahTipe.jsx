@@ -34,8 +34,10 @@ const TambahTipe = () => {
   const [error, setError] = useState(false);
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  const [openAlertRangka, setOpenAlertRangka] = React.useState(false);
-  const [openAlertMesin, setOpenAlertMesin] = React.useState(false);
+  const [openAlertRangka, setOpenAlertRangka] = useState(false);
+  const [openAlertMesin, setOpenAlertMesin] = useState(false);
+  const [openAlertNama, setOpenAlertNama] = useState(false);
+  const [openAlertKode, setOpenAlertKode] = useState(false);
 
   const handleClickOpenAlertRangka = () => {
     setOpenAlertRangka(true);
@@ -51,6 +53,22 @@ const TambahTipe = () => {
 
   const handleCloseAlertMesin = () => {
     setOpenAlertMesin(false);
+  };
+
+  const handleClickOpenAlertNama = () => {
+    setOpenAlertNama(true);
+  };
+
+  const handleCloseAlertNama = () => {
+    setOpenAlertNama(false);
+  };
+
+  const handleClickOpenAlertKode = () => {
+    setOpenAlertKode(true);
+  };
+
+  const handleCloseAlertKode = () => {
+    setOpenAlertKode(false);
   };
 
   const handleClose = (event, reason) => {
@@ -87,10 +105,26 @@ const TambahTipe = () => {
           token: user.token,
           kodeCabang: user.cabang._id
         });
+        let tempNama = await axios.post(`${tempUrl}/tipesNama`, {
+          namaTipe,
+          id: user._id,
+          token: user.token,
+          kodeCabang: user.cabang._id
+        });
+        let tempKode = await axios.post(`${tempUrl}/tipesKode`, {
+          kodeTipe,
+          id: user._id,
+          token: user.token,
+          kodeCabang: user.cabang._id
+        });
         if (tempNoRangka.data.length > 0) {
           handleClickOpenAlertRangka();
         } else if (tempNoMesin.data.length > 0) {
           handleClickOpenAlertMesin();
+        } else if (tempNama.data.length > 0) {
+          handleClickOpenAlertNama();
+        } else if (tempKode.data.length > 0) {
+          handleClickOpenAlertKode();
         } else {
           setLoading(true);
           await axios.post(`${tempUrl}/saveTipe`, {
@@ -156,6 +190,38 @@ const TambahTipe = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseAlertMesin}>Ok</Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog
+        open={openAlertNama}
+        onClose={handleCloseAlertNama}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">{`Nama Tipe Sama`}</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-slide-description">
+            {`Nama Tipe ${namaTipe} sudah ada, ganti Nama Tipe!`}
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseAlertNama}>Ok</Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog
+        open={openAlertKode}
+        onClose={handleCloseAlertKode}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">{`Kode Tipe Sama`}</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-slide-description">
+            {`Kode Tipe ${kodeTipe} sudah ada, ganti Kode Tipe!`}
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseAlertKode}>Ok</Button>
         </DialogActions>
       </Dialog>
       <Divider sx={dividerStyle} />

@@ -2,8 +2,9 @@ import React, { useState, useEffect, useContext } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import { AuthContext } from "../../../contexts/AuthContext";
-import { tempUrl, useStateContext } from "../../../contexts/ContextProvider";
-import { ShowTablePekerjaan } from "../../../components/ShowTable";
+import { tempUrl } from "../../../contexts/ContextProvider";
+import { useStateContext } from "../../../contexts/ContextProvider";
+import { ShowTableCabang } from "../../../components/ShowTable";
 import { FetchErrorHandling } from "../../../components/FetchErrorHandling";
 import {
   SearchBar,
@@ -18,7 +19,12 @@ import {
   Divider,
   Pagination,
   Button,
-  ButtonGroup
+  ButtonGroup,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions
 } from "@mui/material";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
@@ -26,24 +32,39 @@ import * as XLSX from "xlsx";
 import DownloadIcon from "@mui/icons-material/Download";
 import PrintIcon from "@mui/icons-material/Print";
 
-const TampilPekerjaan = () => {
-  const { user, setting } = useContext(AuthContext);
+const TampilCabang = () => {
+  const { user, setting, dispatch } = useContext(AuthContext);
   const location = useLocation();
   const id = location.pathname.split("/")[2];
   const { screenSize } = useStateContext();
 
   const [isFetchError, setIsFetchError] = useState(false);
-  const [kodePekerjaan, setKodePekerjaan] = useState("");
-  const [namaPekerjaan, setNamaPekerjaan] = useState("");
+  const [kodeCabang, setKodeCabang] = useState("");
+  const [namaCabang, setNamaCabang] = useState("");
+  const [alamatCabang, setAlamatCabang] = useState("");
+  const [teleponCabang, setTeleponCabang] = useState("");
+  const [picCabang, setPicCabang] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
-  const [pekerjaansData, setPekerjaansData] = useState([]);
-  const [pekerjaansForDoc, setPekerjaansForDoc] = useState([]);
+  const [cabangsData, setCabangsData] = useState([]);
+  const [cabangForDoc, setCabangForDoc] = useState([]);
   const navigate = useNavigate();
-  let isPekerjaanExist = kodePekerjaan.length !== 0;
+  let isCabangExist = kodeCabang.length !== 0;
+  const [open, setOpen] = useState(false);
+
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
 
   const columns = [
-    { title: "Kode", field: "kodePekerjaan" },
-    { title: "Nama Pekerjaan", field: "namaPekerjaan" }
+    { title: "Kode", field: "_id" },
+    { title: "Nama Cabang", field: "namaCabang" },
+    { title: "Alamat", field: "alamatCabang" },
+    { title: "Telepon", field: "teleponCabang" },
+    { title: "PIC", field: "picCabang" }
   ];
 
   const [loading, setLoading] = useState(false);
@@ -53,12 +74,15 @@ const TampilPekerjaan = () => {
   // Get current posts
   const indexOfLastPost = page * PER_PAGE;
   const indexOfFirstPost = indexOfLastPost - PER_PAGE;
-  const tempPosts = pekerjaansData.filter((val) => {
+  const tempPosts = cabangsData.filter((val) => {
     if (searchTerm === "") {
       return val;
     } else if (
-      val.kodePekerjaan.toUpperCase().includes(searchTerm.toUpperCase()) ||
-      val.namaPekerjaan.toUpperCase().includes(searchTerm.toUpperCase())
+      val._id.toUpperCase().includes(searchTerm.toUpperCase()) ||
+      val.namaCabang.toUpperCase().includes(searchTerm.toUpperCase()) ||
+      val.alamatCabang.toUpperCase().includes(searchTerm.toUpperCase()) ||
+      val.teleponCabang.toUpperCase().includes(searchTerm.toUpperCase()) ||
+      val.picCabang.toUpperCase().includes(searchTerm.toUpperCase())
     ) {
       return val;
     }
@@ -66,7 +90,7 @@ const TampilPekerjaan = () => {
   const currentPosts = tempPosts.slice(indexOfFirstPost, indexOfLastPost);
 
   const count = Math.ceil(tempPosts.length / PER_PAGE);
-  const _DATA = usePagination(pekerjaansData, PER_PAGE);
+  const _DATA = usePagination(cabangsData, PER_PAGE);
 
   const handleChange = (e, p) => {
     setPage(p);
@@ -74,66 +98,76 @@ const TampilPekerjaan = () => {
   };
 
   useEffect(() => {
-    getPekerjaansForDoc();
-    getPekerjaansData();
-    id && getPekerjaanById();
+    getCabangsForDoc();
+    getCabangsData();
+    id && getCabangById();
   }, [id]);
 
-  const getPekerjaansData = async () => {
+  const getCabangsData = async () => {
     setLoading(true);
     try {
-      const allPekerjaans = await axios.post(`${tempUrl}/pekerjaans`, {
+      const allCabangs = await axios.post(`${tempUrl}/cabangs`, {
         id: user._id,
         token: user.token
       });
-      setPekerjaansData(allPekerjaans.data);
+      setCabangsData(allCabangs.data);
     } catch (err) {
       setIsFetchError(true);
     }
     setLoading(false);
   };
 
-  const getPekerjaansForDoc = async () => {
+  const getCabangsForDoc = async () => {
     setLoading(true);
-    try {
-      const allPekerjaansForDoc = await axios.post(
-        `${tempUrl}/pekerjaansForDoc`,
-        {
+    const allCabangForDoc = await axios.post(`${tempUrl}/cabangsForDoc`, {
+      id: user._id,
+      token: user.token
+    });
+    setCabangForDoc(allCabangForDoc.data);
+    setLoading(false);
+  };
+
+  const getCabangById = async () => {
+    if (id) {
+      const pickedCabang = await axios.post(`${tempUrl}/cabangs/${id}`, {
+        id: user._id,
+        token: user.token
+      });
+      setKodeCabang(pickedCabang.data._id);
+      setNamaCabang(pickedCabang.data.namaCabang);
+      setAlamatCabang(pickedCabang.data.alamatCabang);
+      setTeleponCabang(pickedCabang.data.teleponCabang);
+      setPicCabang(pickedCabang.data.picCabang);
+    }
+  };
+
+  const deleteCabang = async (id) => {
+    const findBelisCabang = await axios.post(`${tempUrl}/belisCabang`, {
+      cabangId: id,
+      id: user._id,
+      token: user.token
+    });
+    if (findBelisCabang.data.length > 0) {
+      // There's Record -> Forbid Delete
+      handleClickOpen();
+    } else {
+      // No Record Found -> Delete
+      try {
+        setLoading(true);
+        await axios.post(`${tempUrl}/deleteCabang/${id}`, {
           id: user._id,
           token: user.token
-        }
-      );
-      setPekerjaansForDoc(allPekerjaansForDoc.data);
-    } catch (err) {
-      setIsFetchError(true);
-    }
-    setLoading(false);
-  };
-
-  const getPekerjaanById = async () => {
-    if (id) {
-      const pickedPekerjaan = await axios.post(`${tempUrl}/pekerjaans/${id}`, {
-        id: user._id,
-        token: user.token
-      });
-      setKodePekerjaan(pickedPekerjaan.data.kodePekerjaan);
-      setNamaPekerjaan(pickedPekerjaan.data.namaPekerjaan);
-    }
-  };
-
-  const deletePekerjaan = async (id) => {
-    try {
-      setLoading(true);
-      await axios.post(`${tempUrl}/deletePekerjaan/${id}`, {
-        id: user._id,
-        token: user.token
-      });
-      setKodePekerjaan("");
-      setNamaPekerjaan("");
-      setLoading(false);
-      navigate("/pekerjaan");
-    } catch (error) {
-      console.log(error);
+        });
+        setKodeCabang("");
+        setNamaCabang("");
+        setAlamatCabang("");
+        setTeleponCabang("");
+        setPicCabang("");
+        setLoading(false);
+        navigate("/cabang");
+      } catch (error) {
+        console.log(error);
+      }
     }
   };
 
@@ -148,7 +182,7 @@ const TampilPekerjaan = () => {
     doc.text(`${setting.namaPerusahaan} - ${setting.kotaPerusahaan}`, 15, 10);
     doc.text(`${setting.lokasiPerusahaan}`, 15, 15);
     doc.setFontSize(16);
-    doc.text(`Daftar Pekerjaan`, 90, 30);
+    doc.text(`Daftar Cabang`, 90, 30);
     doc.setFontSize(10);
     doc.text(
       `Dicetak Oleh: ${user.username} | Tanggal : ${current_date} | Jam : ${current_time}`,
@@ -159,25 +193,25 @@ const TampilPekerjaan = () => {
     doc.autoTable({
       startY: doc.pageCount > 1 ? doc.autoTableEndPosY() + 20 : 45,
       columns: columns.map((col) => ({ ...col, dataKey: col.field })),
-      body: pekerjaansForDoc,
+      body: cabangForDoc,
       headStyles: {
         fillColor: [117, 117, 117],
         color: [0, 0, 0]
       }
     });
-    doc.save(`daftarPekerjaan.pdf`);
+    doc.save(`daftarCabang.pdf`);
   };
 
   const downloadExcel = () => {
-    const workSheet = XLSX.utils.json_to_sheet(pekerjaansForDoc);
+    const workSheet = XLSX.utils.json_to_sheet(cabangForDoc);
     const workBook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workBook, workSheet, `Pekerjaan`);
+    XLSX.utils.book_append_sheet(workBook, workSheet, `Cabang`);
     // Buffer
     let buf = XLSX.write(workBook, { bookType: "xlsx", type: "buffer" });
     // Binary String
     XLSX.write(workBook, { bookType: "xlsx", type: "binary" });
     // Download
-    XLSX.writeFile(workBook, `daftarPekerjaan.xlsx`);
+    XLSX.writeFile(workBook, `daftarCabang.xlsx`);
   };
 
   if (loading) {
@@ -192,8 +226,24 @@ const TampilPekerjaan = () => {
     <Box sx={container}>
       <Typography color="#757575">Master</Typography>
       <Typography variant="h4" sx={subTitleText}>
-        Pekerjaan
+        Cabang
       </Typography>
+      <Dialog
+        open={open}
+        onClose={handleClose}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">{`Tidak bisa dihapus karena sudah ada data!`}</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-slide-description">
+            {`Nama Cabang data: ${namaCabang}`}
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose}>Cancel</Button>
+        </DialogActions>
+      </Dialog>
       <Box sx={downloadButtons}>
         <ButtonGroup variant="outlined" color="secondary">
           <Button startIcon={<PrintIcon />} onClick={() => downloadPdf()}>
@@ -207,15 +257,15 @@ const TampilPekerjaan = () => {
       <Box sx={buttonModifierContainer}>
         <ButtonModifier
           id={id}
-          kode={kodePekerjaan}
-          addLink={`/pekerjaan/tambahPekerjaan`}
-          editLink={`/pekerjaan/${id}/edit`}
-          deleteUser={deletePekerjaan}
-          nameUser={kodePekerjaan}
+          kode={kodeCabang}
+          addLink={`/cabang/tambahCabang`}
+          editLink={`/cabang/${id}/edit`}
+          deleteUser={deleteCabang}
+          nameUser={kodeCabang}
         />
       </Box>
       <Divider sx={dividerStyle} />
-      {isPekerjaanExist && (
+      {isCabangExist && (
         <>
           <Box sx={showDataContainer}>
             <Box sx={showDataWrapper}>
@@ -227,11 +277,9 @@ const TampilPekerjaan = () => {
                 InputProps={{
                   readOnly: true
                 }}
-                value={kodePekerjaan}
+                value={kodeCabang}
               />
-              <Typography sx={[labelInput, spacingTop]}>
-                Nama Pekerjaan
-              </Typography>
+              <Typography sx={[labelInput, spacingTop]}>Nama Cabang</Typography>
               <TextField
                 size="small"
                 id="outlined-basic"
@@ -239,7 +287,39 @@ const TampilPekerjaan = () => {
                 InputProps={{
                   readOnly: true
                 }}
-                value={namaPekerjaan}
+                value={namaCabang}
+              />
+              <Typography sx={[labelInput, spacingTop]}>Alamat</Typography>
+              <TextField
+                size="small"
+                id="outlined-basic"
+                variant="filled"
+                InputProps={{
+                  readOnly: true
+                }}
+                value={alamatCabang}
+              />
+            </Box>
+            <Box sx={[showDataWrapper, secondWrapper]}>
+              <Typography sx={labelInput}>Telepon</Typography>
+              <TextField
+                size="small"
+                id="outlined-basic"
+                variant="filled"
+                InputProps={{
+                  readOnly: true
+                }}
+                value={teleponCabang}
+              />
+              <Typography sx={[labelInput, spacingTop]}>PIC</Typography>
+              <TextField
+                size="small"
+                id="outlined-basic"
+                variant="filled"
+                InputProps={{
+                  readOnly: true
+                }}
+                value={picCabang}
               />
             </Box>
           </Box>
@@ -250,10 +330,7 @@ const TampilPekerjaan = () => {
         <SearchBar setSearchTerm={setSearchTerm} />
       </Box>
       <Box sx={tableContainer}>
-        <ShowTablePekerjaan
-          currentPosts={currentPosts}
-          searchTerm={searchTerm}
-        />
+        <ShowTableCabang currentPosts={currentPosts} searchTerm={searchTerm} />
       </Box>
       <Box sx={tableContainer}>
         <Pagination
@@ -268,7 +345,7 @@ const TampilPekerjaan = () => {
   );
 };
 
-export default TampilPekerjaan;
+export default TampilCabang;
 
 const container = {
   p: 4
@@ -326,6 +403,16 @@ const labelInput = {
 
 const spacingTop = {
   mt: 4
+};
+
+const secondWrapper = {
+  marginLeft: {
+    sm: 4
+  },
+  marginTop: {
+    sm: 0,
+    xs: 4
+  }
 };
 
 const downloadButtons = {
