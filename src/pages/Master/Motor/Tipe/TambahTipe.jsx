@@ -93,37 +93,13 @@ const TambahTipe = () => {
       setOpen(!open);
     } else {
       try {
-        let tempNoRangka = await axios.post(`${tempUrl}/tipesNoRangka`, {
-          noRangka,
-          id: user._id,
-          token: user.token,
-          kodeCabang: user.cabang._id
-        });
-        let tempNoMesin = await axios.post(`${tempUrl}/tipesNoMesin`, {
-          noMesin,
-          id: user._id,
-          token: user.token,
-          kodeCabang: user.cabang._id
-        });
-        let tempNama = await axios.post(`${tempUrl}/tipesNama`, {
-          namaTipe,
-          id: user._id,
-          token: user.token,
-          kodeCabang: user.cabang._id
-        });
         let tempKode = await axios.post(`${tempUrl}/tipesKode`, {
           kodeTipe,
           id: user._id,
           token: user.token,
           kodeCabang: user.cabang._id
         });
-        if (tempNoRangka.data.length > 0) {
-          handleClickOpenAlertRangka();
-        } else if (tempNoMesin.data.length > 0) {
-          handleClickOpenAlertMesin();
-        } else if (tempNama.data.length > 0) {
-          handleClickOpenAlertNama();
-        } else if (tempKode.data.length > 0) {
+        if (tempKode.data.length > 0) {
           handleClickOpenAlertKode();
         } else {
           setLoading(true);
