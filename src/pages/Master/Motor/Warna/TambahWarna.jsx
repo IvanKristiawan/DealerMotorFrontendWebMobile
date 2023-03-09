@@ -9,8 +9,8 @@ import {
   Box,
   Typography,
   TextField,
-  Button,
   Divider,
+  Button,
   Snackbar,
   Alert,
   Dialog,
@@ -20,6 +20,12 @@ import {
   DialogActions,
   Paper
 } from "@mui/material";
+import Container from "react-bootstrap/Container";
+import Col from "react-bootstrap/Col";
+import Form from "react-bootstrap/Form";
+import Row from "react-bootstrap/Row";
+import Card from "react-bootstrap/Card";
+import InputGroup from "react-bootstrap/InputGroup";
 import SaveIcon from "@mui/icons-material/Save";
 
 const TambahWarna = () => {
@@ -117,7 +123,7 @@ const TambahWarna = () => {
       <Divider sx={dividerStyle} />
       <Paper sx={contentContainer} elevation={12}>
         <Box sx={showDataContainer}>
-          <Box sx={showDataWrapper}>
+          {/* <Box sx={showDataWrapper}>
             <Typography sx={labelInput}>Nama Warna</Typography>
             <TextField
               size="small"
@@ -130,7 +136,25 @@ const TambahWarna = () => {
               value={namaWarna}
               onChange={(e) => setNamaWarna(e.target.value.toUpperCase())}
             />
-          </Box>
+          </Box> */}
+          <Col sm={6}>
+                <Form.Group
+                  as={Row}
+                  className="mb-3"
+                  controlId="formPlaintextPassword"
+                >
+                  <Form.Label column sm="3">
+                    Nama Warna
+                  </Form.Label>
+                  <Col sm="9">
+                    <Form.Control
+                      value={namaWarna}
+                      error={error && namaWarna.length === 0 && true}
+                      onChange={(e) => setNamaWarna(e.target.value.toUpperCase())}
+                    />
+                  </Col>
+                </Form.Group>
+            </Col>
         </Box>
         <Box sx={spacingTop}>
           <Button
