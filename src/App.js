@@ -216,6 +216,8 @@ import {
   GantiPeriode
 } from "./pages/index";
 
+import 'bootstrap/dist/css/bootstrap.min.css';
+
 const App = () => {
   const { screenSize, setScreenSize } = useStateContext();
   const { collapseSidebar } = useProSidebar();
