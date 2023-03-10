@@ -37,6 +37,8 @@ const TambahWarna = () => {
   const [loading, setLoading] = useState(false);
   const [openAlert, setOpenAlert] = useState(false);
 
+  const [validated, setValidated] = useState(false);
+
   const handleClickOpenAlert = () => {
     setOpenAlert(true);
   };
@@ -92,6 +94,7 @@ const TambahWarna = () => {
         console.log(error);
       }
     }
+    setValidated(true);
   };
 
   if (loading) {
@@ -122,21 +125,8 @@ const TambahWarna = () => {
       </Dialog>
       <Divider sx={dividerStyle} />
       <Paper sx={contentContainer} elevation={12}>
+        <Form noValidate validated={validated} onSubmit={saveWarna}>
         <Box sx={showDataContainer}>
-          {/* <Box sx={showDataWrapper}>
-            <Typography sx={labelInput}>Nama Warna</Typography>
-            <TextField
-              size="small"
-              error={error && namaWarna.length === 0 && true}
-              helperText={
-                error && namaWarna.length === 0 && "Nama Warna harus diisi!"
-              }
-              id="outlined-basic"
-              variant="outlined"
-              value={namaWarna}
-              onChange={(e) => setNamaWarna(e.target.value.toUpperCase())}
-            />
-          </Box> */}
           <Col sm={6}>
                 <Form.Group
                   as={Row}
@@ -149,12 +139,15 @@ const TambahWarna = () => {
                   <Col sm="9">
                     <Form.Control
                       value={namaWarna}
-                      error={error && namaWarna.length === 0 && true}
                       onChange={(e) => setNamaWarna(e.target.value.toUpperCase())}
+                      required
                     />
+                    <Form.Control.Feedback type="invalid">
+                    Nama Warna harus diisi!
+                    </Form.Control.Feedback>
                   </Col>
                 </Form.Group>
-            </Col>
+          </Col>
         </Box>
         <Box sx={spacingTop}>
           <Button
@@ -168,11 +161,12 @@ const TambahWarna = () => {
           <Button
             variant="contained"
             startIcon={<SaveIcon />}
-            onClick={saveWarna}
+            type="submit"
           >
             Simpan
           </Button>
         </Box>
+        </Form>
       </Paper>
       <Divider sx={spacingTop} />
       {error && (
