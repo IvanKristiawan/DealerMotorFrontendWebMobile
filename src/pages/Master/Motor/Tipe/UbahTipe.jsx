@@ -15,6 +15,12 @@ import {
   Alert,
   Paper
 } from "@mui/material";
+import Container from "react-bootstrap/Container";
+import Col from "react-bootstrap/Col";
+import Form from "react-bootstrap/Form";
+import Row from "react-bootstrap/Row";
+import Card from "react-bootstrap/Card";
+import InputGroup from "react-bootstrap/InputGroup";
 import EditIcon from "@mui/icons-material/Edit";
 
 const UbahTipe = () => {
@@ -30,6 +36,8 @@ const UbahTipe = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const [loading, setLoading] = useState(false);
+
+  const [validated, setValidated] = useState(false);
 
   const handleClose = (event, reason) => {
     if (reason === "clickaway") {
@@ -90,6 +98,7 @@ const UbahTipe = () => {
         console.log(error);
       }
     }
+    setValidated(true);
   };
 
   if (loading) {
@@ -104,8 +113,134 @@ const UbahTipe = () => {
       </Typography>
       <Divider sx={dividerStyle} />
       <Paper sx={contentContainer} elevation={12}>
+        <Form noValidate validated={validated} onSubmit={updateTipe}>
         <Box sx={showDataContainer}>
-          <Box sx={showDataWrapper}>
+        <Row>
+              <Col sm={6}>
+                <Form.Group
+                  as={Row}
+                  className="mb-3"
+                  controlId="formPlaintextPassword"
+                >
+                  <Form.Label column sm="3">
+                    Kode
+                  </Form.Label>
+                  <Col sm="9">
+                    <Form.Control
+                      value={kodeTipe}
+                      disabled
+                      onChange={(e) => setKodeTipe(e.target.value.toUpperCase())}
+                    />
+                    <Form.Control.Feedback type="invalid">
+                    Kode harus diisi!
+                    </Form.Control.Feedback>
+                  </Col>
+                </Form.Group>
+              </Col>
+              <Col sm={6}>
+                <Form.Group
+                  as={Row}
+                  className="mb-3"
+                  controlId="formPlaintextPassword"
+                >
+                  <Form.Label column sm="3">
+                    No. Mesin
+                  </Form.Label>
+                  <Col sm="9">
+                    <Form.Control
+                      value={noMesin}
+                      disabled
+                      onChange={(e) => setNoMesin(e.target.value.toUpperCase())}
+                    />
+                    <Form.Control.Feedback type="invalid">
+                    No. Mesin harus diisi!
+                    </Form.Control.Feedback>
+                  </Col>
+                </Form.Group>
+              </Col>
+            </Row>
+            <Row>
+              <Col sm={6}>
+                <Form.Group
+                  as={Row}
+                  className="mb-3"
+                  controlId="formPlaintextPassword"
+                >
+                  <Form.Label column sm="3">
+                    Nama Tipe
+                  </Form.Label>
+                  <Col sm="9">
+                    <Form.Control
+                      value={namaTipe}
+                      required
+                      onChange={(e) => setNamaTipe(e.target.value.toUpperCase())}
+                    />
+                    <Form.Control.Feedback type="invalid">
+                    Nama Tipe harus diisi!
+                    </Form.Control.Feedback>
+                  </Col>
+                </Form.Group>
+              </Col>
+              <Col sm={6}>
+                <Form.Group
+                  as={Row}
+                  className="mb-3"
+                  controlId="formPlaintextPassword"
+                >
+                  <Form.Label column sm="3">
+                    Isi
+                  </Form.Label>
+                  <Col sm="9">
+                    <Form.Control
+                      value={isi}
+                      onChange={(e) => setIsi(e.target.value.toUpperCase())}
+                    />
+                  </Col>
+                </Form.Group>
+              </Col>
+            </Row>
+            <Row>
+              <Col sm={6}>
+                <Form.Group
+                  as={Row}
+                  className="mb-3"
+                  controlId="formPlaintextPassword"
+                >
+                  <Form.Label column sm="3">
+                    No. Rangka
+                  </Form.Label>
+                  <Col sm="9">
+                    <Form.Control
+                      value={noRangka}
+                      disabled
+                      onChange={(e) => setNoRangka(e.target.value.toUpperCase())}
+                    />
+                  </Col>
+                </Form.Group>
+              </Col>
+              <Col sm={6}>
+                <Form.Group
+                  as={Row}
+                  className="mb-3"
+                  controlId="formPlaintextPassword"
+                >
+                  <Form.Label column sm="3">
+                    Merk
+                  </Form.Label>
+                  <Col sm="9">
+                    <Form.Control
+                      value={merk}
+                      required
+                      onChange={(e) => setMerk(e.target.value.toUpperCase())}
+                    />
+                    <Form.Control.Feedback type="invalid">
+                    Merk harus diisi!
+                    </Form.Control.Feedback>
+                  </Col>
+                </Form.Group>
+              </Col>
+            </Row>
+          {/* <Box sx={showDataWrapper}>
             <Typography sx={labelInput}>Kode</Typography>
             <TextField
               size="small"
@@ -173,7 +308,7 @@ const UbahTipe = () => {
               value={merk}
               onChange={(e) => setMerk(e.target.value.toUpperCase())}
             />
-          </Box>
+          </Box> */}
         </Box>
         <Box sx={spacingTop}>
           <Button
@@ -187,11 +322,12 @@ const UbahTipe = () => {
           <Button
             variant="contained"
             startIcon={<EditIcon />}
-            onClick={updateTipe}
+            type="submit"
           >
             Ubah
           </Button>
         </Box>
+        </Form>
       </Paper>
       <Divider sx={dividerStyle} />
       {error && (
@@ -221,7 +357,7 @@ const dividerStyle = {
 
 const showDataContainer = {
   mt: 4,
-  display: "flex",
+  // display: "flex",
   flexDirection: {
     xs: "column",
     sm: "row"
