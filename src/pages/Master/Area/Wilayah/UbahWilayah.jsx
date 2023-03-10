@@ -17,6 +17,11 @@ import {
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 
+import SaveIcon from "@mui/icons-material/Save";
+import Col from "react-bootstrap/Col";
+import Form from "react-bootstrap/Form";
+import Row from "react-bootstrap/Row";
+
 const UbahWilayah = () => {
   const { user } = useContext(AuthContext);
   const [open, setOpen] = useState(false);
@@ -26,6 +31,8 @@ const UbahWilayah = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const [loading, setLoading] = useState(false);
+
+  const [validated, setValidated] = useState(false);
 
   const handleClose = (event, reason) => {
     if (reason === "clickaway") {
@@ -79,6 +86,7 @@ const UbahWilayah = () => {
         console.log(error);
       }
     }
+    setValidated(true);
   };
 
   if (loading) {
@@ -93,8 +101,51 @@ const UbahWilayah = () => {
       </Typography>
       <Divider sx={dividerStyle} />
       <Paper sx={contentContainer} elevation={12}>
+      <Form noValidate validated={validated} onSubmit={updateWilayah}>
         <Box sx={showDataContainer}>
-          <Box sx={showDataWrapper}>
+        <Row>
+          <Col sm={6}>
+                <Form.Group
+                  as={Row}
+                  className="mb-3"
+                  controlId="formPlaintextPassword"
+                >
+                  <Form.Label column sm="3">
+                    Kode Wilayah
+                  </Form.Label>
+                  <Col sm="9">
+                    <Form.Control
+                      value={kodeWilayah}
+                      disabled
+                    />
+                  </Col>
+                </Form.Group>
+              </Col>
+          </Row>
+          <Row>
+            <Col sm={6}>
+                <Form.Group
+                  as={Row}
+                  className="mb-3"
+                  controlId="formPlaintextPassword"
+                >
+                  <Form.Label column sm="3">
+                    Nama Wilayah
+                  </Form.Label>
+                  <Col sm="9">
+                    <Form.Control
+                      value={namaWilayah}
+                      onChange={(e) => setNamaWilayah(e.target.value.toUpperCase())}
+                      required
+                    />
+                    <Form.Control.Feedback type="invalid">
+                    Nama Wilayah harus diisi!
+                    </Form.Control.Feedback>
+                  </Col>
+                </Form.Group>
+              </Col>
+          </Row> 
+          {/* <Box sx={showDataWrapper}>
             <Typography sx={labelInput}>Kode Wilayah</Typography>
             <TextField
               size="small"
@@ -122,7 +173,7 @@ const UbahWilayah = () => {
               value={namaWilayah}
               onChange={(e) => setNamaWilayah(e.target.value.toUpperCase())}
             />
-          </Box>
+          </Box> */}
         </Box>
         <Box sx={spacingTop}>
           <Button
@@ -136,11 +187,12 @@ const UbahWilayah = () => {
           <Button
             variant="contained"
             startIcon={<EditIcon />}
-            onClick={updateWilayah}
+            type="submit"
           >
             Ubah
           </Button>
         </Box>
+        </Form>
       </Paper>
       <Divider sx={dividerStyle} />
       {error && (
@@ -170,7 +222,7 @@ const dividerStyle = {
 
 const showDataContainer = {
   mt: 4,
-  display: "flex",
+  // display: "flex",
   flexDirection: {
     xs: "column",
     sm: "row"
