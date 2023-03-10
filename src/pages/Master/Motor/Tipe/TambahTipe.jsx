@@ -7,6 +7,7 @@ import { Colors } from "../../../../constants/styles";
 import { Loader } from "../../../../components";
 import {
   Box,
+  Grid,
   Typography,
   TextField,
   Button,
@@ -21,6 +22,12 @@ import {
   DialogActions
 } from "@mui/material";
 import SaveIcon from "@mui/icons-material/Save";
+import Container from "react-bootstrap/Container";
+import Col from "react-bootstrap/Col";
+import Form from "react-bootstrap/Form";
+import Row from "react-bootstrap/Row";
+import Card from "react-bootstrap/Card";
+import InputGroup from "react-bootstrap/InputGroup";
 
 const TambahTipe = () => {
   const { user } = useContext(AuthContext);
@@ -38,6 +45,8 @@ const TambahTipe = () => {
   const [openAlertMesin, setOpenAlertMesin] = useState(false);
   const [openAlertNama, setOpenAlertNama] = useState(false);
   const [openAlertKode, setOpenAlertKode] = useState(false);
+
+  const [validated, setValidated] = useState(false);
 
   const handleClickOpenAlertRangka = () => {
     setOpenAlertRangka(true);
@@ -124,6 +133,7 @@ const TambahTipe = () => {
         console.log(error);
       }
     }
+    setValidated(true);
   };
 
   if (loading) {
@@ -202,18 +212,149 @@ const TambahTipe = () => {
       </Dialog>
       <Divider sx={dividerStyle} />
       <Paper sx={contentContainer} elevation={12}>
+        <Form noValidate validated={validated} onSubmit={saveTipe}>
         <Box sx={showDataContainer}>
-          <Box sx={showDataWrapper}>
-            <Typography sx={labelInput}>Kode</Typography>
-            <TextField
-              size="small"
-              error={error && kodeTipe.length === 0 && true}
-              helperText={error && kodeTipe.length === 0 && "Kode harus diisi!"}
-              id="outlined-basic"
-              variant="outlined"
-              value={kodeTipe}
-              onChange={(e) => setKodeTipe(e.target.value.toUpperCase())}
-            />
+            <Row>
+              <Col sm={6}>
+                <Form.Group
+                  as={Row}
+                  className="mb-3"
+                  controlId="formPlaintextPassword"
+                >
+                  <Form.Label column sm="3">
+                    Kode
+                  </Form.Label>
+                  <Col sm="9">
+                    <Form.Control
+                      value={kodeTipe}
+                      required
+                      onChange={(e) => setKodeTipe(e.target.value.toUpperCase())}
+                    />
+                    <Form.Control.Feedback type="invalid">
+                    Kode harus diisi!
+                    </Form.Control.Feedback>
+                  </Col>
+                </Form.Group>
+              </Col>
+              <Col sm={6}>
+                <Form.Group
+                  as={Row}
+                  className="mb-3"
+                  controlId="formPlaintextPassword"
+                >
+                  <Form.Label column sm="3">
+                    No. Mesin
+                  </Form.Label>
+                  <Col sm="9">
+                    <Form.Control
+                      value={noMesin}
+                      required
+                      onChange={(e) => setNoMesin(e.target.value.toUpperCase())}
+                    />
+                    <Form.Control.Feedback type="invalid">
+                    No. Mesin harus diisi!
+                    </Form.Control.Feedback>
+                  </Col>
+                </Form.Group>
+              </Col>
+            </Row>
+            <Row>
+              <Col sm={6}>
+                <Form.Group
+                  as={Row}
+                  className="mb-3"
+                  controlId="formPlaintextPassword"
+                >
+                  <Form.Label column sm="3">
+                    Nama Tipe
+                  </Form.Label>
+                  <Col sm="9">
+                    <Form.Control
+                      value={namaTipe}
+                      required
+                      onChange={(e) => setNamaTipe(e.target.value.toUpperCase())}
+                    />
+                    <Form.Control.Feedback type="invalid">
+                    Nama Tipe harus diisi!
+                    </Form.Control.Feedback>
+                  </Col>
+                </Form.Group>
+              </Col>
+              <Col sm={6}>
+                <Form.Group
+                  as={Row}
+                  className="mb-3"
+                  controlId="formPlaintextPassword"
+                >
+                  <Form.Label column sm="3">
+                    Isi
+                  </Form.Label>
+                  <Col sm="9">
+                    <Form.Control
+                      value={isi}
+                      onChange={(e) => setIsi(e.target.value.toUpperCase())}
+                    />
+                  </Col>
+                </Form.Group>
+              </Col>
+            </Row>
+            <Row>
+              <Col sm={6}>
+                <Form.Group
+                  as={Row}
+                  className="mb-3"
+                  controlId="formPlaintextPassword"
+                >
+                  <Form.Label column sm="3">
+                    No. Rangka
+                  </Form.Label>
+                  <Col sm="9">
+                    <Form.Control
+                      value={noRangka}
+                      onChange={(e) => setNoRangka(e.target.value.toUpperCase())}
+                    />
+                  </Col>
+                </Form.Group>
+              </Col>
+              <Col sm={6}>
+                <Form.Group
+                  as={Row}
+                  className="mb-3"
+                  controlId="formPlaintextPassword"
+                >
+                  <Form.Label column sm="3">
+                    Merk
+                  </Form.Label>
+                  <Col sm="9">
+                    <Form.Control
+                      value={merk}
+                      required
+                      onChange={(e) => setMerk(e.target.value.toUpperCase())}
+                    />
+                    <Form.Control.Feedback type="invalid">
+                    Merk harus diisi!
+                    </Form.Control.Feedback>
+                  </Col>
+                </Form.Group>
+              </Col>
+            </Row>
+          {/* <Box sx={showDataWrapper}>
+            <Grid container alignItems="center" spacing={2}>
+              <Grid item>
+                <Typography sx={labelInput}>Kode</Typography>
+              </Grid>
+              <Grid item xs={12} sm={12} md={12} lg={6} xl={4}>
+                <TextField
+                  size="small"
+                  error={error && kodeTipe.length === 0 && true}
+                  helperText={error && kodeTipe.length === 0 && "Kode harus diisi!"}
+                  id="outlined-basic"
+                  variant="outlined"
+                  value={kodeTipe}
+                  onChange={(e) => setKodeTipe(e.target.value.toUpperCase())}
+                />
+              </Grid>
+            </Grid>
             <Typography sx={[labelInput, spacingTop]}>Nama Tipe</Typography>
             <TextField
               size="small"
@@ -233,8 +374,8 @@ const TambahTipe = () => {
               variant="outlined"
               value={noRangka}
               onChange={(e) => setNoRangka(e.target.value.toUpperCase())}
-            />
-          </Box>
+            /> */}
+          {/* </Box>
           <Box sx={[showDataWrapper, secondWrapper]}>
             <Typography sx={labelInput}>No. Mesin</Typography>
             <TextField
@@ -262,7 +403,7 @@ const TambahTipe = () => {
               value={merk}
               onChange={(e) => setMerk(e.target.value.toUpperCase())}
             />
-          </Box>
+          </Box> */}
         </Box>
         <Box sx={spacingTop}>
           <Button
@@ -276,11 +417,12 @@ const TambahTipe = () => {
           <Button
             variant="contained"
             startIcon={<SaveIcon />}
-            onClick={saveTipe}
+            type="submit"
           >
             Simpan
           </Button>
         </Box>
+        </Form>
       </Paper>
       <Divider sx={spacingTop} />
       {error && (
@@ -310,7 +452,6 @@ const dividerStyle = {
 
 const showDataContainer = {
   mt: 4,
-  display: "flex",
   flexDirection: {
     xs: "column",
     sm: "row"
