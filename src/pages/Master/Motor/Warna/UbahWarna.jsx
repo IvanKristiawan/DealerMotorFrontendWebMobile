@@ -15,6 +15,14 @@ import {
   Alert,
   Paper
 } from "@mui/material";
+
+import Container from "react-bootstrap/Container";
+import Col from "react-bootstrap/Col";
+import Form from "react-bootstrap/Form";
+import Row from "react-bootstrap/Row";
+import Card from "react-bootstrap/Card";
+import InputGroup from "react-bootstrap/InputGroup";
+import SaveIcon from "@mui/icons-material/Save";
 import EditIcon from "@mui/icons-material/Edit";
 
 const UbahWarna = () => {
@@ -64,7 +72,28 @@ const UbahWarna = () => {
       <Divider sx={dividerStyle} />
       <Paper sx={contentContainer} elevation={12}>
         <Box sx={showDataContainer}>
-          <Box sx={showDataWrapper}>
+          <Col sm={6}>
+                <Form.Group
+                  as={Row}
+                  className="mb-3"
+                  controlId="formPlaintextPassword"
+                >
+                  <Form.Label column sm="3">
+                    Nama Warna
+                  </Form.Label>
+                  <Col sm="9">
+                    <Form.Control
+                      value={namaWarna}
+                      onChange={(e) => setNamaWarna(e.target.value.toUpperCase())}
+                      readOnly
+                    />
+                    <Form.Control.Feedback type="invalid">
+                    Nama Warna harus diisi!
+                    </Form.Control.Feedback>
+                  </Col>
+                </Form.Group>
+          </Col>
+          {/* <Box sx={showDataWrapper}>
             <Typography sx={labelInput}>Nama Warna</Typography>
             <TextField
               size="small"
@@ -80,7 +109,7 @@ const UbahWarna = () => {
               }}
               sx={{ backgroundColor: Colors.grey400 }}
             />
-          </Box>
+          </Box> */}
         </Box>
         <Box sx={spacingTop}>
           <Button
