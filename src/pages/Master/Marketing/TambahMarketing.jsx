@@ -16,6 +16,10 @@ import {
   Paper
 } from "@mui/material";
 import SaveIcon from "@mui/icons-material/Save";
+import Col from "react-bootstrap/Col";
+import Form from "react-bootstrap/Form";
+import Row from "react-bootstrap/Row";
+
 
 const TambahMarketing = () => {
   const { user } = useContext(AuthContext);
@@ -26,6 +30,8 @@ const TambahMarketing = () => {
   const [error, setError] = useState(false);
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+
+  const [validated, setValidated] = useState(false);
 
   const handleClose = (event, reason) => {
     if (reason === "clickaway") {
@@ -83,6 +89,7 @@ const TambahMarketing = () => {
         console.log(error);
       }
     }
+    setValidated(true);
   };
 
   if (loading) {
@@ -97,8 +104,71 @@ const TambahMarketing = () => {
       </Typography>
       <Divider sx={dividerStyle} />
       <Paper sx={contentContainer} elevation={12}>
+      <Form noValidate validated={validated} onSubmit={saveMarketing}>
         <Box sx={showDataContainer}>
-          <Box sx={showDataWrapper}>
+        <Row>
+              <Col sm={6}>
+                <Form.Group
+                  as={Row}
+                  className="mb-3"
+                  controlId="formPlaintextPassword"
+                >
+                  <Form.Label column sm="3">
+                  Kode Marketing
+                  </Form.Label>
+                  <Col sm="9">
+                    <Form.Control
+                      value={kodeMarketing}
+                      disabled
+                    />
+                  </Col>
+                </Form.Group>
+              </Col>
+          </Row>
+          <Row>
+          <Col sm={6}>
+                <Form.Group
+                  as={Row}
+                  className="mb-3"
+                  controlId="formPlaintextPassword"
+                >
+                  <Form.Label column sm="3">
+                  Telepon
+                  </Form.Label>
+                  <Col sm="9">
+                    <Form.Control
+                      value={teleponMarketing}
+                      type="number"
+                      onChange={(e) => setTeleponMarketing(e.target.value.toUpperCase())}
+                    />
+                  </Col>
+                </Form.Group>
+              </Col>
+          </Row>
+          <Row>
+              <Col sm={6}>
+                <Form.Group
+                  as={Row}
+                  className="mb-3"
+                  controlId="formPlaintextPassword"
+                >
+                  <Form.Label column sm="3">
+                  Nama Marketing
+                  </Form.Label>
+                  <Col sm="9">
+                    <Form.Control
+                      value={namaMarketing}
+                      required
+                      onChange={(e) => setNamaMarketing(e.target.value.toUpperCase())}
+                    />
+                    <Form.Control.Feedback type="invalid">
+                    Nama Marketing harus diisi!
+                    </Form.Control.Feedback>
+                  </Col>
+                </Form.Group>
+              </Col>
+          </Row>
+          {/* <Box sx={showDataWrapper}>
             <Typography sx={labelInput}>Kode Marketing</Typography>
             <TextField
               size="small"
@@ -137,7 +207,7 @@ const TambahMarketing = () => {
                 setTeleponMarketing(e.target.value.toUpperCase())
               }
             />
-          </Box>
+          </Box> */}
         </Box>
         <Box sx={spacingTop}>
           <Button
@@ -151,11 +221,12 @@ const TambahMarketing = () => {
           <Button
             variant="contained"
             startIcon={<SaveIcon />}
-            onClick={saveMarketing}
+            type="submit"
           >
             Simpan
           </Button>
         </Box>
+        </Form>
       </Paper>
       <Divider sx={spacingTop} />
       {error && (
@@ -185,7 +256,7 @@ const dividerStyle = {
 
 const showDataContainer = {
   mt: 4,
-  display: "flex",
+  // display: "flex",
   flexDirection: {
     xs: "column",
     sm: "row"
