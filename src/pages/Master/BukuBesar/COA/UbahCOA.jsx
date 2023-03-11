@@ -17,6 +17,9 @@ import {
   Autocomplete
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
+import Col from "react-bootstrap/Col";
+import Form from "react-bootstrap/Form";
+import Row from "react-bootstrap/Row";
 
 const UbahCOA = () => {
   const { user } = useContext(AuthContext);
@@ -28,6 +31,8 @@ const UbahCOA = () => {
   const [kodeJenisCOA, setKodeJenisCOA] = useState("");
   const [kodeGroupCOA, setKodeGroupCOA] = useState("");
   const [kodeSubGroupCOA, setKodeSubGroupCOA] = useState("");
+
+  const [validated, setValidated] = useState(false);
 
   const [error, setError] = useState(false);
   const navigate = useNavigate();
@@ -102,6 +107,7 @@ const UbahCOA = () => {
         console.log(error);
       }
     }
+    setValidated(true);
   };
 
   if (loading) {
@@ -116,8 +122,167 @@ const UbahCOA = () => {
       </Typography>
       <Divider sx={dividerStyle} />
       <Paper sx={contentContainer} elevation={12}>
+      <Form noValidate validated={validated} onSubmit={updateCoa}>
         <Box sx={showDataContainer}>
-          <Box sx={showDataWrapper}>
+        <Row>
+              <Col sm={6}>
+                <Form.Group
+                  as={Row}
+                  className="mb-3"
+                  controlId="formPlaintextPassword"
+                >
+                  <Form.Label column sm="3">
+                  Kode Jenis COA
+                  </Form.Label>
+                  <Col sm="9">
+                    <Form.Control
+                      value={kodeJenisCOA}
+                      disabled
+                    />
+                  </Col>
+                </Form.Group>
+              </Col>
+              <Col sm={6}>
+                <Form.Group
+                  as={Row}
+                  className="mb-3"
+                  controlId="formPlaintextPassword"
+                >
+                  <Form.Label column sm="3">
+                  Nama COA
+                  </Form.Label>
+                  <Col sm="9">
+                    <Form.Control
+                      value={namaCOA}
+                      onChange={(e) => setNamaCOA(e.target.value.toUpperCase())}
+                      required
+                    />
+                    <Form.Control.Feedback type="invalid">
+                    Nama COA harus diisi!
+                    </Form.Control.Feedback>
+                  </Col>
+                </Form.Group>
+              </Col>
+          </Row>
+          <Row>
+            <Col sm={6}>
+                <Form.Group
+                  as={Row}
+                  className="mb-3"
+                  controlId="formPlaintextPassword"
+                >
+                  <Form.Label column sm="3">
+                  Kode Group COA
+                  </Form.Label>
+                  <Col sm="9">
+                    <Form.Control
+                      value={kodeGroupCOA}
+                      disabled
+                    />
+                  </Col>
+                </Form.Group>
+              </Col>
+              <Col sm={6}>
+                <Form.Group
+                  as={Row}
+                  className="mb-3"
+                  controlId="formPlaintextPassword"
+                >
+                  <Form.Label column sm="3">
+                    Jenis Saldo
+                  </Form.Label>
+                  <Col sm="9">
+                    <Form.Select
+                      required
+                      value={jenisSaldo}
+                      onChange={(e) => {
+                        setJenisSaldo(e.target.value.split(" ", 1)[0]);
+                      }}
+                    >
+                    {
+                      jenisSaldoOptions.map((jenisSaldoOptions) => {
+                          return (<option value={jenisSaldoOptions.label}>{jenisSaldoOptions.label}</option>)
+                      })
+                    }
+                    </Form.Select>
+                    <Form.Control.Feedback type="invalid">
+                    Jenis Saldo harus diisi!
+                    </Form.Control.Feedback>
+                  </Col>
+                </Form.Group>
+              </Col>
+          </Row>
+          <Row>
+          <Col sm={6}>
+                <Form.Group
+                  as={Row}
+                  className="mb-3"
+                  controlId="formPlaintextPassword"
+                >
+                  <Form.Label column sm="3">
+                  Kode Sub-Group COA
+                  </Form.Label>
+                  <Col sm="9">
+                    <Form.Control
+                      value={kodeSubGroupCOA}
+                      disabled
+                    />
+                  </Col>
+                </Form.Group>
+              </Col>
+              <Col sm={6}>
+                <Form.Group
+                  as={Row}
+                  className="mb-3"
+                  controlId="formPlaintextPassword"
+                >
+                  <Form.Label column sm="3">
+                    Kas/Bank
+                  </Form.Label>
+                  <Col sm="9">
+                    <Form.Select
+                      required
+                      value={kasBank}
+                      onChange={(e) => {
+                        setKasBank(e.target.value.split(" ", 1)[0]);
+                      }}
+                    >
+                    {
+                      kasBankOptions.map((kasBankOptions) => {
+                          return (<option value={kasBankOptions.label}>{kasBankOptions.label}</option>)
+                      })
+                    }
+                    </Form.Select>
+                    <Form.Control.Feedback type="invalid">
+                    Kas/Bank harus diisi!
+                    </Form.Control.Feedback>
+                  </Col>
+                </Form.Group>
+              </Col>
+          </Row>
+          <Row>
+              <Col sm={6}>
+                <Form.Group
+                  as={Row}
+                  className="mb-3"
+                  controlId="formPlaintextPassword"
+                >
+                  <Form.Label column sm="3">
+                  Kode COA
+                  </Form.Label>
+                  <Col sm="9">
+                    <Form.Control
+                      value={kodeCOA}
+                      disabled
+                    />
+                    <Form.Control.Feedback type="invalid">
+                    Kode COA harus diisi!
+                    </Form.Control.Feedback>
+                  </Col>
+                </Form.Group>
+              </Col>
+          </Row>
+          {/* <Box sx={showDataWrapper}>
             <Typography sx={labelInput}>Kode Jenis COA</Typography>
             <TextField
               size="small"
@@ -220,7 +385,7 @@ const UbahCOA = () => {
               value={{ label: kasBank }}
               onInputChange={(e, value) => setKasBank(value)}
             />
-          </Box>
+          </Box> */}
         </Box>
         <Box sx={spacingTop}>
           <Button
@@ -234,11 +399,12 @@ const UbahCOA = () => {
           <Button
             variant="contained"
             startIcon={<EditIcon />}
-            onClick={updateCoa}
+            type="submit"
           >
             Ubah
           </Button>
         </Box>
+        </Form>
       </Paper>
       <Divider sx={dividerStyle} />
       {error && (
@@ -268,7 +434,7 @@ const dividerStyle = {
 
 const showDataContainer = {
   mt: 4,
-  display: "flex",
+  // display: "flex",
   flexDirection: {
     xs: "column",
     sm: "row"
