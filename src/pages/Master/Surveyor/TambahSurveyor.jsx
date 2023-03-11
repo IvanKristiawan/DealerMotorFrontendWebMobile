@@ -17,6 +17,9 @@ import {
   Paper
 } from "@mui/material";
 import SaveIcon from "@mui/icons-material/Save";
+import Col from "react-bootstrap/Col";
+import Form from "react-bootstrap/Form";
+import Row from "react-bootstrap/Row";
 
 const TambahSurveyor = () => {
   const { user } = useContext(AuthContext);
@@ -29,6 +32,8 @@ const TambahSurveyor = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
 
+  const [validated, setValidated] = useState(false);
+
   const handleClose = (event, reason) => {
     if (reason === "clickaway") {
       return;
@@ -38,6 +43,7 @@ const TambahSurveyor = () => {
 
   useEffect(() => {
     getNextKodeSurveyor();
+    setJenisSurveyor('CMO');
   }, []);
 
   const getNextKodeSurveyor = async () => {
@@ -84,6 +90,7 @@ const TambahSurveyor = () => {
         console.log(error);
       }
     }
+    setValidated(true);
   };
 
   const jenisSurveyorOption = [{ label: "CMO" }, { label: "SURVEYOR" }];
@@ -100,8 +107,97 @@ const TambahSurveyor = () => {
       </Typography>
       <Divider sx={dividerStyle} />
       <Paper sx={contentContainer} elevation={12}>
+      <Form noValidate validated={validated} onSubmit={saveSurveyor}>
         <Box sx={showDataContainer}>
-          <Box sx={showDataWrapper}>
+        <Row>
+              <Col sm={6}>
+                <Form.Group
+                  as={Row}
+                  className="mb-3"
+                  controlId="formPlaintextPassword"
+                >
+                  <Form.Label column sm="3">
+                  Kode Surveyor
+                  </Form.Label>
+                  <Col sm="9">
+                    <Form.Control
+                      value={kodeSurveyor}
+                      disabled
+                    />
+                  </Col>
+                </Form.Group>
+              </Col>
+              <Col sm={6}>
+                <Form.Group
+                  as={Row}
+                  className="mb-3"
+                  controlId="formPlaintextPassword"
+                >
+                  <Form.Label column sm="3">
+                  Telepon
+                  </Form.Label>
+                  <Col sm="9">
+                    <Form.Control
+                      value={teleponSurveyor}
+                      type="number"
+                      onChange={(e) => setTeleponSurveyor(e.target.value.toUpperCase())}
+                    />
+                  </Col>
+                </Form.Group>
+              </Col>
+          </Row>
+          <Row>
+              <Col sm={6}>
+                <Form.Group
+                  as={Row}
+                  className="mb-3"
+                  controlId="formPlaintextPassword"
+                >
+                  <Form.Label column sm="3">
+                  Nama Surveyor
+                  </Form.Label>
+                  <Col sm="9">
+                    <Form.Control
+                      value={namaSurveyor}
+                      required
+                      onChange={(e) => setNamaSurveyor(e.target.value.toUpperCase())}
+                    />
+                    <Form.Control.Feedback type="invalid">
+                    Nama Surveyor harus diisi!
+                    </Form.Control.Feedback>
+                  </Col>
+                </Form.Group>
+              </Col>
+              <Col sm={6}>
+                <Form.Group
+                  as={Row}
+                  className="mb-3"
+                  controlId="formPlaintextPassword"
+                >
+                  <Form.Label column sm="3">
+                    Jenis Surveyor
+                  </Form.Label>
+                  <Col sm="9">
+                    <Form.Select
+                      required
+                      onChange={(e) => {
+                        setJenisSurveyor(e.target.value.toUpperCase());
+                      }}
+                    >
+                    {
+                      jenisSurveyorOption.map((jenisSurveyorOption) => {
+                          return (<option value={jenisSurveyorOption.label}>{jenisSurveyorOption.label}</option>)
+                      })
+                    }
+                    </Form.Select>
+                    <Form.Control.Feedback type="invalid">
+                    Jenis Surveyor harus diisi!
+                    </Form.Control.Feedback>
+                  </Col>
+                </Form.Group>
+              </Col>
+          </Row>
+          {/* <Box sx={showDataWrapper}>
             <Typography sx={labelInput}>Kode Surveyor</Typography>
             <TextField
               size="small"
@@ -156,7 +252,7 @@ const TambahSurveyor = () => {
               )}
               onInputChange={(e, value) => setJenisSurveyor(value)}
             />
-          </Box>
+          </Box> */}
         </Box>
         <Box sx={spacingTop}>
           <Button
@@ -170,11 +266,12 @@ const TambahSurveyor = () => {
           <Button
             variant="contained"
             startIcon={<SaveIcon />}
-            onClick={saveSurveyor}
+            type="submit"
           >
             Simpan
           </Button>
         </Box>
+        </Form>
       </Paper>
       <Divider sx={spacingTop} />
       {error && (
@@ -204,7 +301,7 @@ const dividerStyle = {
 
 const showDataContainer = {
   mt: 4,
-  display: "flex",
+  // display: "flex",
   flexDirection: {
     xs: "column",
     sm: "row"
