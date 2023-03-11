@@ -17,6 +17,9 @@ import {
   Paper
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
+import Col from "react-bootstrap/Col";
+import Form from "react-bootstrap/Form";
+import Row from "react-bootstrap/Row";
 
 const UbahKecamatan = () => {
   const { user } = useContext(AuthContext);
@@ -29,6 +32,8 @@ const UbahKecamatan = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const [loading, setLoading] = useState(false);
+
+  const [validated, setValidated] = useState(false);
 
   const handleClose = (event, reason) => {
     if (reason === "clickaway") {
@@ -102,6 +107,7 @@ const UbahKecamatan = () => {
         console.log(error);
       }
     }
+    setValidated(true);
   };
 
   const wilayahOptions = wilayahsData.map((wil) => ({
@@ -120,8 +126,65 @@ const UbahKecamatan = () => {
       </Typography>
       <Divider sx={dividerStyle} />
       <Paper sx={contentContainer} elevation={12}>
+      <Form noValidate validated={validated} onSubmit={updateKecamatan}>
         <Box sx={showDataContainer}>
-          <Box sx={showDataWrapper}>
+          <Row>
+          <Col sm={6}>
+                <Form.Group
+                  as={Row}
+                  className="mb-3"
+                  controlId="formPlaintextPassword"
+                >
+                  <Form.Label column sm="3">
+                    Kode Wilayah
+                  </Form.Label>
+                  <Col sm="9">
+                    <Form.Select
+                      required
+                      inputValue={kodeWilayah}
+                      value={kodeWilayahLama}
+                      onChange={(e) => {
+                        setKodeWilayah(e.target.value.toUpperCase());
+                        setKodeWilayahLama(kodeWilayahLama.toUpperCase());
+                      }}
+                    >
+                    {
+                      wilayahOptions.map((wilayahOptions) => {
+                          return (<option key={wilayahOptions.id} value={wilayahOptions.label}>{wilayahOptions.label}</option>)
+                      })
+                    }
+                    </Form.Select>
+                    <Form.Control.Feedback type="invalid">
+                    Kode Wilayah harus diisi!
+                    </Form.Control.Feedback>
+                  </Col>
+                </Form.Group>
+              </Col>
+          </Row>
+          <Row>
+            <Col sm={6}>
+                <Form.Group
+                  as={Row}
+                  className="mb-3"
+                  controlId="formPlaintextPassword"
+                >
+                  <Form.Label column sm="3">
+                    Nama Kecamatan
+                  </Form.Label>
+                  <Col sm="9">
+                    <Form.Control
+                      value={namaKecamatan}
+                      onChange={(e) => setNamaKecamatan(e.target.value.toUpperCase())}
+                      required
+                    />
+                    <Form.Control.Feedback type="invalid">
+                    Nama Wilayah harus diisi!
+                    </Form.Control.Feedback>
+                  </Col>
+                </Form.Group>
+              </Col>
+          </Row> 
+          {/* <Box sx={showDataWrapper}>
             <Typography sx={labelInput}>Kode Wilayah</Typography>
             <Autocomplete
               size="small"
@@ -161,7 +224,7 @@ const UbahKecamatan = () => {
               value={namaKecamatan}
               onChange={(e) => setNamaKecamatan(e.target.value.toUpperCase())}
             />
-          </Box>
+          </Box> */}
         </Box>
         <Box sx={spacingTop}>
           <Button
@@ -175,11 +238,12 @@ const UbahKecamatan = () => {
           <Button
             variant="contained"
             startIcon={<EditIcon />}
-            onClick={updateKecamatan}
+            type="submit"
           >
             Ubah
           </Button>
         </Box>
+        </Form>
       </Paper>
       <Divider sx={dividerStyle} />
       {error && (
@@ -209,7 +273,7 @@ const dividerStyle = {
 
 const showDataContainer = {
   mt: 4,
-  display: "flex",
+  // display: "flex",
   flexDirection: {
     xs: "column",
     sm: "row"
