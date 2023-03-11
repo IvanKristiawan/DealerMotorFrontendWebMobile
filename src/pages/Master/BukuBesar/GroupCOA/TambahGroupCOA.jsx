@@ -17,6 +17,9 @@ import {
   Paper
 } from "@mui/material";
 import SaveIcon from "@mui/icons-material/Save";
+import Col from "react-bootstrap/Col";
+import Form from "react-bootstrap/Form";
+import Row from "react-bootstrap/Row";
 
 const TambahGroupCOA = () => {
   const { user } = useContext(AuthContext);
@@ -26,6 +29,8 @@ const TambahGroupCOA = () => {
   const [kodeGroupCOA, setKodeGroupCOA] = useState("");
   const [namaGroupCOA, setNamaGroupCOA] = useState("");
   const [jenisCOAsData, setJenisCOAsData] = useState([]);
+
+  const [validated, setValidated] = useState(false);
 
   const [error, setError] = useState(false);
   const navigate = useNavigate();
@@ -50,6 +55,9 @@ const TambahGroupCOA = () => {
       kodeCabang: user.cabang._id
     });
     setJenisCOAsData(allJenisCOAs.data);
+    setKodeJenisCOA(allJenisCOAs.data[0].kodeJenisCOA);
+    setNamaJenisCOA(allJenisCOAs.data[0].namaJenisCOA);
+    setKodeGroupCOA(getGroupCOAsNextKode(allJenisCOAs.data[0].kodeJenisCOA));
     setLoading(false);
   };
 
@@ -96,6 +104,7 @@ const TambahGroupCOA = () => {
         console.log(error);
       }
     }
+    setValidated(true);
   };
 
   const jenisCOAOptions = jenisCOAsData.map((groupCOA) => ({
@@ -114,8 +123,83 @@ const TambahGroupCOA = () => {
       </Typography>
       <Divider sx={dividerStyle} />
       <Paper sx={contentContainer} elevation={12}>
+      <Form noValidate validated={validated} onSubmit={saveGroupCOA}>
         <Box sx={showDataContainer}>
-          <Box sx={showDataWrapper}>
+        <Row>
+          <Col sm={6}>
+                <Form.Group
+                  as={Row}
+                  className="mb-3"
+                  controlId="formPlaintextPassword"
+                >
+                  <Form.Label column sm="3">
+                    Kode Jenis COA
+                  </Form.Label>
+                  <Col sm="9">
+                    <Form.Select
+                      required
+                      onChange={(e) => {
+                        setKodeJenisCOA(e.target.value.split(" ", 1)[0]);
+                        setNamaJenisCOA(e.target.value.split("- ")[1]);
+                        getGroupCOAsNextKode(e.target.value.split(" ", 1)[0]);
+                      }}
+                    >
+                    {
+                      jenisCOAOptions.map((jenisCOAOptions) => {
+                          return (<option value={jenisCOAOptions.label}>{jenisCOAOptions.label}</option>)
+                      })
+                    }
+                    </Form.Select>
+                    <Form.Control.Feedback type="invalid">
+                    Kode Jenis COA harus diisi!
+                    </Form.Control.Feedback>
+                  </Col>
+                </Form.Group>
+              </Col>
+          </Row>
+          <Row>
+            <Col sm={6}>
+                <Form.Group
+                  as={Row}
+                  className="mb-3"
+                  controlId="formPlaintextPassword"
+                >
+                  <Form.Label column sm="3">
+                    Kode Group COA
+                  </Form.Label>
+                  <Col sm="9">
+                    <Form.Control
+                      value={kodeGroupCOA}
+                      disabled
+                    />
+                  </Col>
+                </Form.Group>
+              </Col>
+          </Row>
+          <Row>
+            <Col sm={6}>
+                <Form.Group
+                  as={Row}
+                  className="mb-3"
+                  controlId="formPlaintextPassword"
+                >
+                  <Form.Label column sm="3">
+                  Nama Group COA
+                  </Form.Label>
+                  <Col sm="9">
+                    <Form.Control
+                      value={namaGroupCOA}
+                      onChange={(e) => setNamaGroupCOA(e.target.value.toUpperCase())}
+                      required
+                    />
+                    <Form.Control.Feedback type="invalid">
+                    Nama Group COA harus diisi!
+                    </Form.Control.Feedback>
+                  </Col>
+                </Form.Group>
+              </Col>
+          </Row>
+          {/* <Box sx={showDataWrapper}>
             <Typography sx={labelInput}>Kode Jenis COA</Typography>
             <Autocomplete
               size="small"
@@ -167,7 +251,7 @@ const TambahGroupCOA = () => {
               value={namaGroupCOA}
               onChange={(e) => setNamaGroupCOA(e.target.value.toUpperCase())}
             />
-          </Box>
+          </Box> */}
         </Box>
         <Box sx={spacingTop}>
           <Button
@@ -181,11 +265,12 @@ const TambahGroupCOA = () => {
           <Button
             variant="contained"
             startIcon={<SaveIcon />}
-            onClick={saveGroupCOA}
+            type="submit"
           >
             Simpan
           </Button>
         </Box>
+        </Form>
       </Paper>
       <Divider sx={spacingTop} />
       {error && (
@@ -215,7 +300,7 @@ const dividerStyle = {
 
 const showDataContainer = {
   mt: 4,
-  display: "flex",
+  // display: "flex",
   flexDirection: {
     xs: "column",
     sm: "row"
