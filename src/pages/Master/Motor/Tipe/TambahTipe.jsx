@@ -22,12 +22,9 @@ import {
   DialogActions
 } from "@mui/material";
 import SaveIcon from "@mui/icons-material/Save";
-import Container from "react-bootstrap/Container";
 import Col from "react-bootstrap/Col";
 import Form from "react-bootstrap/Form";
 import Row from "react-bootstrap/Row";
-import Card from "react-bootstrap/Card";
-import InputGroup from "react-bootstrap/InputGroup";
 
 const TambahTipe = () => {
   const { user } = useContext(AuthContext);
