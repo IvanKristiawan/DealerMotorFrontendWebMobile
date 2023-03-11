@@ -17,6 +17,9 @@ import {
   Paper
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
+import Col from "react-bootstrap/Col";
+import Form from "react-bootstrap/Form";
+import Row from "react-bootstrap/Row";
 
 const UbahSurveyor = () => {
   const { user } = useContext(AuthContext);
@@ -30,6 +33,8 @@ const UbahSurveyor = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const [loading, setLoading] = useState(false);
+
+  const [validated, setValidated] = useState(false);
 
   const handleClose = (event, reason) => {
     if (reason === "clickaway") {
@@ -89,6 +94,7 @@ const UbahSurveyor = () => {
         console.log(error);
       }
     }
+    setValidated(true);
   };
 
   const jenisSurveyorOption = [{ label: "CMO" }, { label: "SURVEYOR" }];
@@ -105,8 +111,100 @@ const UbahSurveyor = () => {
       </Typography>
       <Divider sx={dividerStyle} />
       <Paper sx={contentContainer} elevation={12}>
+      <Form noValidate validated={validated} onSubmit={updateSurveyor}>
         <Box sx={showDataContainer}>
-          <Box sx={showDataWrapper}>
+        <Row>
+              <Col sm={6}>
+                <Form.Group
+                  as={Row}
+                  className="mb-3"
+                  controlId="formPlaintextPassword"
+                >
+                  <Form.Label column sm="3">
+                  Kode Surveyor
+                  </Form.Label>
+                  <Col sm="9">
+                    <Form.Control
+                      value={kodeSurveyor}
+                      disabled
+                    />
+                  </Col>
+                </Form.Group>
+              </Col>
+              <Col sm={6}>
+                <Form.Group
+                  as={Row}
+                  className="mb-3"
+                  controlId="formPlaintextPassword"
+                >
+                  <Form.Label column sm="3">
+                  Telepon
+                  </Form.Label>
+                  <Col sm="9">
+                    <Form.Control
+                      value={teleponSurveyor}
+                      type="number"
+                      onChange={(e) => setTeleponSurveyor(e.target.value.toUpperCase())}
+                    />
+                  </Col>
+                </Form.Group>
+              </Col>
+          </Row>
+          <Row>
+              <Col sm={6}>
+                <Form.Group
+                  as={Row}
+                  className="mb-3"
+                  controlId="formPlaintextPassword"
+                >
+                  <Form.Label column sm="3">
+                  Nama Surveyor
+                  </Form.Label>
+                  <Col sm="9">
+                    <Form.Control
+                      value={namaSurveyor}
+                      required
+                      onChange={(e) => setNamaSurveyor(e.target.value.toUpperCase())}
+                    />
+                    <Form.Control.Feedback type="invalid">
+                    Nama Surveyor harus diisi!
+                    </Form.Control.Feedback>
+                  </Col>
+                </Form.Group>
+              </Col>
+              <Col sm={6}>
+                <Form.Group
+                  as={Row}
+                  className="mb-3"
+                  controlId="formPlaintextPassword"
+                >
+                  <Form.Label column sm="3">
+                    Jenis Surveyor
+                  </Form.Label>
+                  <Col sm="9">
+                    <Form.Select
+                      required
+                      inputValue={jenisSurveyor}
+                      value={jenisSurveyorLama}
+                      onChange={(e) => {
+                        setJenisSurveyor(e.target.value);
+                        setJenisSurveyorLama(e.target.value);
+                      }}
+                    >
+                    {
+                      jenisSurveyorOption.map((jenisSurveyorOption) => {
+                          return (<option value={jenisSurveyorOption.label}>{jenisSurveyorOption.label}</option>)
+                      })
+                    }
+                    </Form.Select>
+                    <Form.Control.Feedback type="invalid">
+                    Jenis Surveyor harus diisi!
+                    </Form.Control.Feedback>
+                  </Col>
+                </Form.Group>
+              </Col>
+          </Row>
+          {/* <Box sx={showDataWrapper}>
             <Typography sx={labelInput}>Kode Surveyor</Typography>
             <TextField
               size="small"
@@ -170,7 +268,7 @@ const UbahSurveyor = () => {
               onChange={(e, value) => setJenisSurveyorLama(value)}
               value={jenisSurveyorLama}
             />
-          </Box>
+          </Box> */}
         </Box>
         <Box sx={spacingTop}>
           <Button
@@ -184,11 +282,12 @@ const UbahSurveyor = () => {
           <Button
             variant="contained"
             startIcon={<EditIcon />}
-            onClick={updateSurveyor}
+            type="submit"
           >
             Ubah
           </Button>
         </Box>
+        </Form>
       </Paper>
       <Divider sx={dividerStyle} />
       {error && (
@@ -218,7 +317,7 @@ const dividerStyle = {
 
 const showDataContainer = {
   mt: 4,
-  display: "flex",
+  // display: "flex",
   flexDirection: {
     xs: "column",
     sm: "row"
