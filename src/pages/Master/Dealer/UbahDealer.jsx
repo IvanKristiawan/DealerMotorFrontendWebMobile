@@ -16,6 +16,9 @@ import {
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import { Colors } from "../../../constants/styles";
+import Col from "react-bootstrap/Col";
+import Form from "react-bootstrap/Form";
+import Row from "react-bootstrap/Row";
 
 const UbahDealer = () => {
   const { user } = useContext(AuthContext);
@@ -29,6 +32,8 @@ const UbahDealer = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const [loading, setLoading] = useState(false);
+
+  const [validated, setValidated] = useState(false);
 
   const handleClose = (event, reason) => {
     if (reason === "clickaway") {
@@ -88,6 +93,7 @@ const UbahDealer = () => {
         console.log(error);
       }
     }
+    setValidated(true);
   };
 
   if (loading) {
@@ -102,8 +108,109 @@ const UbahDealer = () => {
       </Typography>
       <Divider sx={dividerStyle} />
       <Paper sx={contentContainer} elevation={12}>
+      <Form noValidate validated={validated} onSubmit={updateDealer}>
         <Box sx={showDataContainer}>
-          <Box sx={showDataWrapper}>
+        <Row>
+              <Col sm={6}>
+                <Form.Group
+                  as={Row}
+                  className="mb-3"
+                  controlId="formPlaintextPassword"
+                >
+                  <Form.Label column sm="3">
+                  Kode Dealer
+                  </Form.Label>
+                  <Col sm="9">
+                    <Form.Control
+                      value={kodeDealer}
+                      disabled
+                    />
+                  </Col>
+                </Form.Group>
+              </Col>
+              <Col sm={6}>
+                <Form.Group
+                  as={Row}
+                  className="mb-3"
+                  controlId="formPlaintextPassword"
+                >
+                  <Form.Label column sm="3">
+                  Telepon
+                  </Form.Label>
+                  <Col sm="9">
+                    <Form.Control
+                      value={teleponDealer}
+                      type="number"
+                      onChange={(e) => setTeleponDealer(e.target.value.toUpperCase())}
+                    />
+                  </Col>
+                </Form.Group>
+              </Col>
+          </Row>
+          <Row>
+              <Col sm={6}>
+                <Form.Group
+                  as={Row}
+                  className="mb-3"
+                  controlId="formPlaintextPassword"
+                >
+                  <Form.Label column sm="3">
+                  Nama Dealer
+                  </Form.Label>
+                  <Col sm="9">
+                    <Form.Control
+                      value={namaDealer}
+                      required
+                      onChange={(e) => setNamaDealer(e.target.value.toUpperCase())}
+                    />
+                    <Form.Control.Feedback type="invalid">
+                    Nama Dealer harus diisi!
+                    </Form.Control.Feedback>
+                  </Col>
+                </Form.Group>
+              </Col>
+              <Col sm={6}>
+                <Form.Group
+                  as={Row}
+                  className="mb-3"
+                  controlId="formPlaintextPassword"
+                >
+                  <Form.Label column sm="3">
+                  PIC
+                  </Form.Label>
+                  <Col sm="9">
+                    <Form.Control
+                      value={PICDealer}
+                      onChange={(e) => setPICDealer(e.target.value.toUpperCase())}
+                      required
+                    />
+                    <Form.Control.Feedback type="invalid">
+                    PIC Dealer harus diisi!
+                    </Form.Control.Feedback>
+                  </Col>
+                </Form.Group>
+              </Col>
+          </Row>
+          <Row>
+              <Col sm={6}>
+                <Form.Group
+                  as={Row}
+                  className="mb-3"
+                  controlId="formPlaintextPassword"
+                >
+                  <Form.Label column sm="3">
+                  Alamat
+                  </Form.Label>
+                  <Col sm="9">
+                    <Form.Control
+                      value={alamatDealer}
+                      onChange={(e) => setAlamatDealer(e.target.value.toUpperCase())}
+                    />
+                  </Col>
+                </Form.Group>
+              </Col>
+          </Row>
+          {/* <Box sx={showDataWrapper}>
             <Typography sx={labelInput}>Kode Dealer</Typography>
             <TextField
               size="small"
@@ -158,7 +265,7 @@ const UbahDealer = () => {
               value={PICDealer}
               onChange={(e) => setPICDealer(e.target.value.toUpperCase())}
             />
-          </Box>
+          </Box> */}
         </Box>
         <Box sx={spacingTop}>
           <Button
@@ -172,11 +279,12 @@ const UbahDealer = () => {
           <Button
             variant="contained"
             startIcon={<EditIcon />}
-            onClick={updateDealer}
+            type="submit"
           >
             Ubah
           </Button>
         </Box>
+        </Form>
       </Paper>
       <Divider sx={dividerStyle} />
       {error && (
@@ -206,7 +314,7 @@ const dividerStyle = {
 
 const showDataContainer = {
   mt: 4,
-  display: "flex",
+  // display: "flex",
   flexDirection: {
     xs: "column",
     sm: "row"
