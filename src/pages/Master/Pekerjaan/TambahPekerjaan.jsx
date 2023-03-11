@@ -16,6 +16,9 @@ import {
   Paper
 } from "@mui/material";
 import SaveIcon from "@mui/icons-material/Save";
+import Col from "react-bootstrap/Col";
+import Form from "react-bootstrap/Form";
+import Row from "react-bootstrap/Row";
 
 const TambahPekerjaan = () => {
   const { user } = useContext(AuthContext);
@@ -25,6 +28,8 @@ const TambahPekerjaan = () => {
   const [error, setError] = useState(false);
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+
+  const [validated, setValidated] = useState(false);
 
   const handleClose = (event, reason) => {
     if (reason === "clickaway") {
@@ -82,6 +87,7 @@ const TambahPekerjaan = () => {
         console.log(error);
       }
     }
+    setValidated(true);
   };
 
   if (loading) {
@@ -96,8 +102,51 @@ const TambahPekerjaan = () => {
       </Typography>
       <Divider sx={dividerStyle} />
       <Paper sx={contentContainer} elevation={12}>
+      <Form noValidate validated={validated} onSubmit={savePekerjaan}>
         <Box sx={showDataContainer}>
-          <Box sx={showDataWrapper}>
+        <Row>
+              <Col sm={6}>
+                <Form.Group
+                  as={Row}
+                  className="mb-3"
+                  controlId="formPlaintextPassword"
+                >
+                  <Form.Label column sm="3">
+                  Kode Pekerjaan
+                  </Form.Label>
+                  <Col sm="9">
+                    <Form.Control
+                      value={kodePekerjaan}
+                      disabled
+                    />
+                  </Col>
+                </Form.Group>
+              </Col>
+          </Row>
+          <Row>
+              <Col sm={6}>
+                <Form.Group
+                  as={Row}
+                  className="mb-3"
+                  controlId="formPlaintextPassword"
+                >
+                  <Form.Label column sm="3">
+                  Nama Pekerjaan
+                  </Form.Label>
+                  <Col sm="9">
+                    <Form.Control
+                      value={namaPekerjaan}
+                      required
+                      onChange={(e) => setNamaPekerjaan(e.target.value.toUpperCase())}
+                    />
+                    <Form.Control.Feedback type="invalid">
+                    Nama Pekerjaan harus diisi!
+                    </Form.Control.Feedback>
+                  </Col>
+                </Form.Group>
+              </Col>
+          </Row>
+          {/* <Box sx={showDataWrapper}>
             <Typography sx={labelInput}>Kode Pekerjaan</Typography>
             <TextField
               size="small"
@@ -125,7 +174,7 @@ const TambahPekerjaan = () => {
               value={namaPekerjaan}
               onChange={(e) => setNamaPekerjaan(e.target.value.toUpperCase())}
             />
-          </Box>
+          </Box> */}
         </Box>
         <Box sx={spacingTop}>
           <Button
@@ -139,11 +188,12 @@ const TambahPekerjaan = () => {
           <Button
             variant="contained"
             startIcon={<SaveIcon />}
-            onClick={savePekerjaan}
+            type="submit"
           >
             Simpan
           </Button>
         </Box>
+        </Form>
       </Paper>
       <Divider sx={spacingTop} />
       {error && (
@@ -173,7 +223,7 @@ const dividerStyle = {
 
 const showDataContainer = {
   mt: 4,
-  display: "flex",
+  // display: "flex",
   flexDirection: {
     xs: "column",
     sm: "row"
