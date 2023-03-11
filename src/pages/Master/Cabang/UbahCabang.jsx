@@ -17,6 +17,9 @@ import {
   Autocomplete
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
+import Col from "react-bootstrap/Col";
+import Form from "react-bootstrap/Form";
+import Row from "react-bootstrap/Row";
 
 const UbahCabang = () => {
   const { user } = useContext(AuthContext);
@@ -30,6 +33,8 @@ const UbahCabang = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const [loading, setLoading] = useState(false);
+
+  const [validated, setValidated] = useState(false);
 
   const handleClose = (event, reason) => {
     if (reason === "clickaway") {
@@ -79,6 +84,7 @@ const UbahCabang = () => {
         console.log(error);
       }
     }
+    setValidated(true);
   };
 
   if (loading) {
@@ -93,8 +99,109 @@ const UbahCabang = () => {
       </Typography>
       <Divider sx={dividerStyle} />
       <Paper sx={contentContainer} elevation={12}>
+      <Form noValidate validated={validated} onSubmit={updateCabang}>
         <Box sx={showDataContainer}>
-          <Box sx={showDataWrapper}>
+        <Row>
+              <Col sm={6}>
+                <Form.Group
+                  as={Row}
+                  className="mb-3"
+                  controlId="formPlaintextPassword"
+                >
+                  <Form.Label column sm="3">
+                  Kode Cabang
+                  </Form.Label>
+                  <Col sm="9">
+                    <Form.Control
+                      value={kodeCabang}
+                      disabled
+                    />
+                  </Col>
+                </Form.Group>
+              </Col>
+              <Col sm={6}>
+                <Form.Group
+                  as={Row}
+                  className="mb-3"
+                  controlId="formPlaintextPassword"
+                >
+                  <Form.Label column sm="3">
+                  Telepon
+                  </Form.Label>
+                  <Col sm="9">
+                    <Form.Control
+                      value={teleponCabang}
+                      type="number"
+                      onChange={(e) => setTeleponCabang(e.target.value.toUpperCase())}
+                    />
+                  </Col>
+                </Form.Group>
+              </Col>
+          </Row>
+          <Row>
+              <Col sm={6}>
+                <Form.Group
+                  as={Row}
+                  className="mb-3"
+                  controlId="formPlaintextPassword"
+                >
+                  <Form.Label column sm="3">
+                  Nama Cabang
+                  </Form.Label>
+                  <Col sm="9">
+                    <Form.Control
+                      value={namaCabang}
+                      required
+                      onChange={(e) => setNamaCabang(e.target.value.toUpperCase())}
+                    />
+                    <Form.Control.Feedback type="invalid">
+                    Nama Cabang harus diisi!
+                    </Form.Control.Feedback>
+                  </Col>
+                </Form.Group>
+              </Col>
+              <Col sm={6}>
+                <Form.Group
+                  as={Row}
+                  className="mb-3"
+                  controlId="formPlaintextPassword"
+                >
+                  <Form.Label column sm="3">
+                  PIC
+                  </Form.Label>
+                  <Col sm="9">
+                    <Form.Control
+                      value={picCabang}
+                      onChange={(e) => setPicCabang(e.target.value.toUpperCase())}
+                      required
+                    />
+                    <Form.Control.Feedback type="invalid">
+                    PIC Cabang harus diisi!
+                    </Form.Control.Feedback>
+                  </Col>
+                </Form.Group>
+              </Col>
+          </Row>
+          <Row>
+              <Col sm={6}>
+                <Form.Group
+                  as={Row}
+                  className="mb-3"
+                  controlId="formPlaintextPassword"
+                >
+                  <Form.Label column sm="3">
+                  Alamat
+                  </Form.Label>
+                  <Col sm="9">
+                    <Form.Control
+                      value={alamatCabang}
+                      onChange={(e) => setAlamatCabang(e.target.value.toUpperCase())}
+                    />
+                  </Col>
+                </Form.Group>
+              </Col>
+          </Row>
+          {/* <Box sx={showDataWrapper}>
             <Typography sx={labelInput}>Kode Cabang</Typography>
             <TextField
               size="small"
@@ -153,7 +260,7 @@ const UbahCabang = () => {
               value={picCabang}
               onChange={(e) => setPicCabang(e.target.value.toUpperCase())}
             />
-          </Box>
+          </Box> */}
         </Box>
         <Box sx={spacingTop}>
           <Button
@@ -167,11 +274,12 @@ const UbahCabang = () => {
           <Button
             variant="contained"
             startIcon={<EditIcon />}
-            onClick={updateCabang}
+            type="submit"
           >
             Ubah
           </Button>
         </Box>
+        </Form>
       </Paper>
       <Divider sx={dividerStyle} />
       {error && (
