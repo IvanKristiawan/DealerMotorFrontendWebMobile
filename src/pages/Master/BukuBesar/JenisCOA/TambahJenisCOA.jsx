@@ -16,12 +16,17 @@ import {
   Paper
 } from "@mui/material";
 import SaveIcon from "@mui/icons-material/Save";
+import Col from "react-bootstrap/Col";
+import Form from "react-bootstrap/Form";
+import Row from "react-bootstrap/Row";
 
 const TambahJenisCOA = () => {
   const { user } = useContext(AuthContext);
   const [open, setOpen] = useState(false);
   const [kodeJenisCOA, setKodeJenisCOA] = useState("");
   const [namaJenisCOA, setNamaJenisCOA] = useState("");
+
+  const [validated, setValidated] = useState(false);
 
   const [error, setError] = useState(false);
   const navigate = useNavigate();
@@ -79,6 +84,7 @@ const TambahJenisCOA = () => {
         console.log(error);
       }
     }
+    setValidated(true);
   };
 
   if (loading) {
@@ -93,8 +99,51 @@ const TambahJenisCOA = () => {
       </Typography>
       <Divider sx={dividerStyle} />
       <Paper sx={contentContainer} elevation={12}>
+      <Form noValidate validated={validated} onSubmit={saveJenisCOA}>
         <Box sx={showDataContainer}>
-          <Box sx={showDataWrapper}>
+        <Row>
+          <Col sm={6}>
+                <Form.Group
+                  as={Row}
+                  className="mb-3"
+                  controlId="formPlaintextPassword"
+                >
+                  <Form.Label column sm="3">
+                    Kode Jenis COA
+                  </Form.Label>
+                  <Col sm="9">
+                    <Form.Control
+                      value={kodeJenisCOA}
+                      disabled
+                    />
+                  </Col>
+                </Form.Group>
+              </Col>
+          </Row>
+          <Row>
+            <Col sm={6}>
+                <Form.Group
+                  as={Row}
+                  className="mb-3"
+                  controlId="formPlaintextPassword"
+                >
+                  <Form.Label column sm="3">
+                    Nama Jenis COA
+                  </Form.Label>
+                  <Col sm="9">
+                    <Form.Control
+                      value={namaJenisCOA}
+                      onChange={(e) => setNamaJenisCOA(e.target.value.toUpperCase())}
+                      required
+                    />
+                    <Form.Control.Feedback type="invalid">
+                    Nama Jenis COA harus diisi!
+                    </Form.Control.Feedback>
+                  </Col>
+                </Form.Group>
+              </Col>
+          </Row> 
+          {/* <Box sx={showDataWrapper}>
             <Typography sx={labelInput}>Kode Jenis COA</Typography>
             <TextField
               size="small"
@@ -122,7 +171,7 @@ const TambahJenisCOA = () => {
               value={namaJenisCOA}
               onChange={(e) => setNamaJenisCOA(e.target.value.toUpperCase())}
             />
-          </Box>
+          </Box> */}
         </Box>
         <Box sx={spacingTop}>
           <Button
@@ -136,11 +185,12 @@ const TambahJenisCOA = () => {
           <Button
             variant="contained"
             startIcon={<SaveIcon />}
-            onClick={saveJenisCOA}
+            type="submit"
           >
             Simpan
           </Button>
         </Box>
+        </Form>
       </Paper>
       <Divider sx={spacingTop} />
       {error && (
@@ -170,7 +220,7 @@ const dividerStyle = {
 
 const showDataContainer = {
   mt: 4,
-  display: "flex",
+  // display: "flex",
   flexDirection: {
     xs: "column",
     sm: "row"
