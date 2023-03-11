@@ -16,6 +16,9 @@ import {
   Paper
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
+import Col from "react-bootstrap/Col";
+import Form from "react-bootstrap/Form";
+import Row from "react-bootstrap/Row";
 
 const UbahSubGroupCOA = () => {
   const { user } = useContext(AuthContext);
@@ -28,6 +31,8 @@ const UbahSubGroupCOA = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const [loading, setLoading] = useState(false);
+
+  const [validated, setValidated] = useState(false);
 
   const handleClose = (event, reason) => {
     if (reason === "clickaway") {
@@ -84,6 +89,7 @@ const UbahSubGroupCOA = () => {
         console.log(error);
       }
     }
+    setValidated(true);
   };
 
   if (loading) {
@@ -98,8 +104,70 @@ const UbahSubGroupCOA = () => {
       </Typography>
       <Divider sx={dividerStyle} />
       <Paper sx={contentContainer} elevation={12}>
+      <Form noValidate validated={validated} onSubmit={updateSubGroupCOA}>
         <Box sx={showDataContainer}>
-          <Box sx={showDataWrapper}>
+        <Row>
+            <Col sm={6}>
+                <Form.Group
+                  as={Row}
+                  className="mb-3"
+                  controlId="formPlaintextPassword"
+                >
+                  <Form.Label column sm="3">
+                  Kode Group COA
+                  </Form.Label>
+                  <Col sm="9">
+                    <Form.Control
+                      value={kodeGroupCOA}
+                      disabled
+                    />
+                  </Col>
+                </Form.Group>
+              </Col>
+          </Row>
+          <Row>
+            <Col sm={6}>
+                <Form.Group
+                  as={Row}
+                  className="mb-3"
+                  controlId="formPlaintextPassword"
+                >
+                  <Form.Label column sm="3">
+                    Kode Sub-Group COA
+                  </Form.Label>
+                  <Col sm="9">
+                    <Form.Control
+                      value={kodeSubGroupCOA}
+                      disabled
+                    />
+                  </Col>
+                </Form.Group>
+              </Col>
+          </Row>
+          <Row>
+            <Col sm={6}>
+                <Form.Group
+                  as={Row}
+                  className="mb-3"
+                  controlId="formPlaintextPassword"
+                >
+                  <Form.Label column sm="3">
+                  Nama Sub-Group COA
+                  </Form.Label>
+                  <Col sm="9">
+                    <Form.Control
+                      value={namaSubGroupCOA}
+                      onChange={(e) => setNamaSubGroupCOA(e.target.value.toUpperCase())}
+                      required
+                    />
+                    <Form.Control.Feedback type="invalid">
+                    Nama Sub-Group COA harus diisi!
+                    </Form.Control.Feedback>
+                  </Col>
+                </Form.Group>
+              </Col>
+          </Row>
+          {/* <Box sx={showDataWrapper}>
             <Typography sx={labelInput}>Kode Group COA</Typography>
             <TextField
               size="small"
@@ -140,7 +208,7 @@ const UbahSubGroupCOA = () => {
               value={namaSubGroupCOA}
               onChange={(e) => setNamaSubGroupCOA(e.target.value.toUpperCase())}
             />
-          </Box>
+          </Box> */}
         </Box>
         <Box sx={spacingTop}>
           <Button
@@ -154,11 +222,12 @@ const UbahSubGroupCOA = () => {
           <Button
             variant="contained"
             startIcon={<EditIcon />}
-            onClick={updateSubGroupCOA}
+            type="submit"
           >
             Ubah
           </Button>
         </Box>
+        </Form>
       </Paper>
       <Divider sx={dividerStyle} />
       {error && (
@@ -188,7 +257,7 @@ const dividerStyle = {
 
 const showDataContainer = {
   mt: 4,
-  display: "flex",
+  // display: "flex",
   flexDirection: {
     xs: "column",
     sm: "row"
