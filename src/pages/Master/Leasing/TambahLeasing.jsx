@@ -16,6 +16,9 @@ import {
   Paper
 } from "@mui/material";
 import SaveIcon from "@mui/icons-material/Save";
+import Col from "react-bootstrap/Col";
+import Form from "react-bootstrap/Form";
+import Row from "react-bootstrap/Row";
 
 const TambahLeasing = () => {
   const { user } = useContext(AuthContext);
@@ -28,6 +31,8 @@ const TambahLeasing = () => {
   const [error, setError] = useState(false);
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+
+  const [validated, setValidated] = useState(false);
 
   const handleClose = (event, reason) => {
     if (reason === "clickaway") {
@@ -85,6 +90,7 @@ const TambahLeasing = () => {
         console.log(error);
       }
     }
+    setValidated(true);
   };
 
   if (loading) {
@@ -99,8 +105,109 @@ const TambahLeasing = () => {
       </Typography>
       <Divider sx={dividerStyle} />
       <Paper sx={contentContainer} elevation={12}>
+      <Form noValidate validated={validated} onSubmit={saveLeasing}>
         <Box sx={showDataContainer}>
-          <Box sx={showDataWrapper}>
+        <Row>
+              <Col sm={6}>
+                <Form.Group
+                  as={Row}
+                  className="mb-3"
+                  controlId="formPlaintextPassword"
+                >
+                  <Form.Label column sm="3">
+                  Kode Leasing
+                  </Form.Label>
+                  <Col sm="9">
+                    <Form.Control
+                      value={kodeLeasing}
+                      disabled
+                    />
+                  </Col>
+                </Form.Group>
+              </Col>
+              <Col sm={6}>
+                <Form.Group
+                  as={Row}
+                  className="mb-3"
+                  controlId="formPlaintextPassword"
+                >
+                  <Form.Label column sm="3">
+                  Telepon
+                  </Form.Label>
+                  <Col sm="9">
+                    <Form.Control
+                      value={teleponLeasing}
+                      type="number"
+                      onChange={(e) => setTeleponLeasing(e.target.value.toUpperCase())}
+                    />
+                  </Col>
+                </Form.Group>
+              </Col>
+          </Row>
+          <Row>
+              <Col sm={6}>
+                <Form.Group
+                  as={Row}
+                  className="mb-3"
+                  controlId="formPlaintextPassword"
+                >
+                  <Form.Label column sm="3">
+                  Nama Leasing
+                  </Form.Label>
+                  <Col sm="9">
+                    <Form.Control
+                      value={namaLeasing}
+                      required
+                      onChange={(e) => setNamaLeasing(e.target.value.toUpperCase())}
+                    />
+                    <Form.Control.Feedback type="invalid">
+                    Nama Leasing harus diisi!
+                    </Form.Control.Feedback>
+                  </Col>
+                </Form.Group>
+              </Col>
+              <Col sm={6}>
+                <Form.Group
+                  as={Row}
+                  className="mb-3"
+                  controlId="formPlaintextPassword"
+                >
+                  <Form.Label column sm="3">
+                  PIC
+                  </Form.Label>
+                  <Col sm="9">
+                    <Form.Control
+                      value={picLeasing}
+                      onChange={(e) => setPicLeasing(e.target.value.toUpperCase())}
+                      required
+                    />
+                    <Form.Control.Feedback type="invalid">
+                    PIC Leasing harus diisi!
+                    </Form.Control.Feedback>
+                  </Col>
+                </Form.Group>
+              </Col>
+          </Row>
+          <Row>
+              <Col sm={6}>
+                <Form.Group
+                  as={Row}
+                  className="mb-3"
+                  controlId="formPlaintextPassword"
+                >
+                  <Form.Label column sm="3">
+                  Alamat
+                  </Form.Label>
+                  <Col sm="9">
+                    <Form.Control
+                      value={alamatLeasing}
+                      onChange={(e) => setAlamatLeasing(e.target.value.toUpperCase())}
+                    />
+                  </Col>
+                </Form.Group>
+              </Col>
+          </Row>
+          {/* <Box sx={showDataWrapper}>
             <Typography sx={labelInput}>Kode Leasing</Typography>
             <TextField
               size="small"
@@ -155,7 +262,7 @@ const TambahLeasing = () => {
               value={picLeasing}
               onChange={(e) => setPicLeasing(e.target.value.toUpperCase())}
             />
-          </Box>
+          </Box> */}
         </Box>
         <Box sx={spacingTop}>
           <Button
@@ -169,11 +276,12 @@ const TambahLeasing = () => {
           <Button
             variant="contained"
             startIcon={<SaveIcon />}
-            onClick={saveLeasing}
+            type="submit"
           >
             Simpan
           </Button>
         </Box>
+        </Form>
       </Paper>
       <Divider sx={spacingTop} />
       {error && (
@@ -203,7 +311,7 @@ const dividerStyle = {
 
 const showDataContainer = {
   mt: 4,
-  display: "flex",
+  // display: "flex",
   flexDirection: {
     xs: "column",
     sm: "row"
