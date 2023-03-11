@@ -17,6 +17,9 @@ import {
   Paper
 } from "@mui/material";
 import SaveIcon from "@mui/icons-material/Save";
+import Col from "react-bootstrap/Col";
+import Form from "react-bootstrap/Form";
+import Row from "react-bootstrap/Row";
 
 const TambahSubGroupCOA = () => {
   const { user } = useContext(AuthContext);
@@ -30,6 +33,8 @@ const TambahSubGroupCOA = () => {
   const [error, setError] = useState(false);
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+
+  const [validated, setValidated] = useState(false);
 
   const handleClose = (event, reason) => {
     if (reason === "clickaway") {
@@ -50,6 +55,9 @@ const TambahSubGroupCOA = () => {
       kodeCabang: user.cabang._id
     });
     setGroupCOAsData(allGroupCOAs.data);
+    setKodeGroupCOA(allGroupCOAs.data[0].kodeGroupCOA);
+    setNamaGroupCOA(allGroupCOAs.data[0].namaGroupCOA);
+    setKodeSubGroupCOA(getSubGroupCOAsNextKode(allGroupCOAs.data[0].kodeGroupCOA));
     setLoading(false);
   };
 
@@ -96,6 +104,7 @@ const TambahSubGroupCOA = () => {
         console.log(error);
       }
     }
+    setValidated(true);
   };
 
   const groupCOAOptions = groupCOAsData.map((groupCOA) => ({
@@ -114,8 +123,83 @@ const TambahSubGroupCOA = () => {
       </Typography>
       <Divider sx={dividerStyle} />
       <Paper sx={contentContainer} elevation={12}>
+      <Form noValidate validated={validated} onSubmit={saveSubGroupCOA}>
         <Box sx={showDataContainer}>
-          <Box sx={showDataWrapper}>
+        <Row>
+          <Col sm={6}>
+                <Form.Group
+                  as={Row}
+                  className="mb-3"
+                  controlId="formPlaintextPassword"
+                >
+                  <Form.Label column sm="3">
+                    Kode Group COA
+                  </Form.Label>
+                  <Col sm="9">
+                    <Form.Select
+                      required
+                      onChange={(e) => {
+                        setKodeGroupCOA(e.target.value.split(" ", 1)[0]);
+                        setNamaGroupCOA(e.target.value.split("- ")[1]);
+                        getSubGroupCOAsNextKode(e.target.value.split(" ", 1)[0]);
+                      }}
+                    >
+                    {
+                      groupCOAOptions.map((groupCOAOptions) => {
+                          return (<option value={groupCOAOptions.label}>{groupCOAOptions.label}</option>)
+                      })
+                    }
+                    </Form.Select>
+                    <Form.Control.Feedback type="invalid">
+                    Kode Group COA harus diisi!
+                    </Form.Control.Feedback>
+                  </Col>
+                </Form.Group>
+              </Col>
+          </Row>
+          <Row>
+            <Col sm={6}>
+                <Form.Group
+                  as={Row}
+                  className="mb-3"
+                  controlId="formPlaintextPassword"
+                >
+                  <Form.Label column sm="3">
+                    Kode Sub-Group COA
+                  </Form.Label>
+                  <Col sm="9">
+                    <Form.Control
+                      value={kodeSubGroupCOA}
+                      disabled
+                    />
+                  </Col>
+                </Form.Group>
+              </Col>
+          </Row>
+          <Row>
+            <Col sm={6}>
+                <Form.Group
+                  as={Row}
+                  className="mb-3"
+                  controlId="formPlaintextPassword"
+                >
+                  <Form.Label column sm="3">
+                  Nama Sub-Group COA
+                  </Form.Label>
+                  <Col sm="9">
+                    <Form.Control
+                      value={namaSubGroupCOA}
+                      onChange={(e) => setNamaSubGroupCOA(e.target.value.toUpperCase())}
+                      required
+                    />
+                    <Form.Control.Feedback type="invalid">
+                    Nama Sub-Group COA harus diisi!
+                    </Form.Control.Feedback>
+                  </Col>
+                </Form.Group>
+              </Col>
+          </Row>
+          {/* <Box sx={showDataWrapper}>
             <Typography sx={labelInput}>Kode Group COA</Typography>
             <Autocomplete
               size="small"
@@ -169,7 +253,7 @@ const TambahSubGroupCOA = () => {
               value={namaSubGroupCOA}
               onChange={(e) => setNamaSubGroupCOA(e.target.value.toUpperCase())}
             />
-          </Box>
+          </Box> */}
         </Box>
         <Box sx={spacingTop}>
           <Button
@@ -183,11 +267,12 @@ const TambahSubGroupCOA = () => {
           <Button
             variant="contained"
             startIcon={<SaveIcon />}
-            onClick={saveSubGroupCOA}
+            type="submit"
           >
             Simpan
           </Button>
         </Box>
+        </Form>
       </Paper>
       <Divider sx={spacingTop} />
       {error && (
@@ -217,7 +302,7 @@ const dividerStyle = {
 
 const showDataContainer = {
   mt: 4,
-  display: "flex",
+  // display: "flex",
   flexDirection: {
     xs: "column",
     sm: "row"
