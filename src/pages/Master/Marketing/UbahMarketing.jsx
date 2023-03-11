@@ -15,6 +15,9 @@ import {
   Alert
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
+import Col from "react-bootstrap/Col";
+import Form from "react-bootstrap/Form";
+import Row from "react-bootstrap/Row";
 
 const UbahMarketing = () => {
   const { user } = useContext(AuthContext);
@@ -26,6 +29,8 @@ const UbahMarketing = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const [loading, setLoading] = useState(false);
+
+  const [validated, setValidated] = useState(false);
 
   const handleClose = (event, reason) => {
     if (reason === "clickaway") {
@@ -81,6 +86,7 @@ const UbahMarketing = () => {
         console.log(error);
       }
     }
+    setValidated(true);
   };
 
   if (loading) {
@@ -94,8 +100,71 @@ const UbahMarketing = () => {
         Ubah Marketing
       </Typography>
       <Divider sx={dividerStyle} />
+      <Form noValidate validated={validated} onSubmit={updateMarketing}>
       <Box sx={showDataContainer}>
-        <Box sx={showDataWrapper}>
+      <Row>
+              <Col sm={6}>
+                <Form.Group
+                  as={Row}
+                  className="mb-3"
+                  controlId="formPlaintextPassword"
+                >
+                  <Form.Label column sm="3">
+                  Kode Marketing
+                  </Form.Label>
+                  <Col sm="9">
+                    <Form.Control
+                      value={kodeMarketing}
+                      disabled
+                    />
+                  </Col>
+                </Form.Group>
+              </Col>
+          </Row>
+          <Row>
+          <Col sm={6}>
+                <Form.Group
+                  as={Row}
+                  className="mb-3"
+                  controlId="formPlaintextPassword"
+                >
+                  <Form.Label column sm="3">
+                  Telepon
+                  </Form.Label>
+                  <Col sm="9">
+                    <Form.Control
+                      value={teleponMarketing}
+                      type="number"
+                      onChange={(e) => setTeleponMarketing(e.target.value.toUpperCase())}
+                    />
+                  </Col>
+                </Form.Group>
+              </Col>
+          </Row>
+          <Row>
+              <Col sm={6}>
+                <Form.Group
+                  as={Row}
+                  className="mb-3"
+                  controlId="formPlaintextPassword"
+                >
+                  <Form.Label column sm="3">
+                  Nama Kolektor
+                  </Form.Label>
+                  <Col sm="9">
+                    <Form.Control
+                      value={namaMarketing}
+                      required
+                      onChange={(e) => setNamaMarketing(e.target.value.toUpperCase())}
+                    />
+                    <Form.Control.Feedback type="invalid">
+                    Nama Marketing harus diisi!
+                    </Form.Control.Feedback>
+                  </Col>
+                </Form.Group>
+              </Col>
+          </Row>
+        {/* <Box sx={showDataWrapper}>
           <Typography sx={labelInput}>Kode Marketing</Typography>
           <TextField
             size="small"
@@ -128,7 +197,7 @@ const UbahMarketing = () => {
             value={teleponMarketing}
             onChange={(e) => setTeleponMarketing(e.target.value.toUpperCase())}
           />
-        </Box>
+        </Box> */}
       </Box>
       <Box sx={spacingTop}>
         <Button
@@ -142,11 +211,12 @@ const UbahMarketing = () => {
         <Button
           variant="contained"
           startIcon={<EditIcon />}
-          onClick={updateMarketing}
+          type="submit"
         >
           Ubah
         </Button>
       </Box>
+      </Form>
       <Divider sx={dividerStyle} />
       {error && (
         <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>
@@ -175,7 +245,7 @@ const dividerStyle = {
 
 const showDataContainer = {
   mt: 4,
-  display: "flex",
+  // display: "flex",
   flexDirection: {
     xs: "column",
     sm: "row"
